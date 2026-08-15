@@ -1,0 +1,27 @@
+{
+  "name": "blog-platform",
+  "version": "1.0.0",
+  "description": "Role-Based Blog Platform with Secret-Key Controlled API Access",
+  "license": "ISC",
+  "author": "Saumyajit Jotdar",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "crypto": "^1.0.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "joi": "^18.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.9.2",
+    "nodemon": "^3.1.14"
+  }
+}
