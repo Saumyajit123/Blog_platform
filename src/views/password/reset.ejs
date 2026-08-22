@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Reset Password
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+    <div class="auth-page">
+
+        <div class="auth-card">
+
+            <h1>
+                Reset Password
+            </h1>
+
+
+            <% if (error) { %>
+
+                <div class="alert error">
+                    <%= error %>
+                </div>
+
+                <% } %>
+
+
+                    <form method="POST" action="/ejs/reset-password">
+
+                        <input type="hidden" name="token" value="<%= token %>">
+
+
+                        <div class="form-group">
+
+                            <label>
+                                New Password
+                            </label>
+
+                            <input type="password" name="newPassword" placeholder="New password" required>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Confirm Password
+                            </label>
+
+                            <input type="password" name="confirmPassword" placeholder="Confirm password" required>
+
+                        </div>
+
+
+                        <button type="submit" class="btn">
+                            Reset Password
+                        </button>
+
+                    </form>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

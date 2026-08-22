@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        <%= blog.title %>
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="nav-brand">
+            Blog Platform
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/ejs/dashboard">
+                Dashboard
+            </a>
+
+            <a href="/ejs/blogs">
+                Blogs
+            </a>
+
+            <a href="/ejs/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container">
+
+        <div class="blog-detail">
+
+            <div class="blog-status-row">
+
+                <span class="status-badge">
+                    <%= blog.status %>
+                </span>
+
+                <span class="category">
+                    <%= blog.category?.name || "No Category" %>
+                </span>
+
+            </div>
+
+
+            <h1>
+                <%= blog.title %>
+            </h1>
+
+
+            <div class="blog-meta">
+
+                <span>
+                    Author:
+                    <%= blog.author?.name || "Unknown" %>
+                </span>
+
+                <span>
+                    <%= new Date( blog.createdAt ).toLocaleDateString() %>
+                </span>
+
+            </div>
+
+
+            <div class="blog-content">
+
+                <%= blog.content %>
+
+            </div>
+
+
+            <div class="interaction-bar">
+
+                <form method="POST" action="/ejs/blog/<%= blog._id %>/like">
+
+                    <button type="submit" class="button">
+
+                        ❤️
+
+                        Like
+
+                        (<%= blog.likes.length %>)
+
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <section class="comments-section">
+
+                <h2>
+                    Comments
+                </h2>
+
+
+                <% if ( blog.comments.length===0 ) { %>
+
+                    <p class="muted">
+                        No comments yet.
+                    </p>
+
+                    <% } %>
+
+
+                        <% blog.comments.forEach( (comment)=> 
+                            { %>
+
+                            <div class="comment-card">
+
+                                <strong>
+                                    <%= comment.user?.name || "User" %>
+                                </strong>
+
+                                <span class="comment-date">
+                                    <%= new Date( comment.createdAt ).toLocaleString() %>
+                                </span>
+
+                                <p>
+                                    <%= comment.comment %>
+                                </p>
+
+                            </div>
+
+                            <% }) %>
+
+            </section>
+
+
+            <section>
+
+                <h3>
+                    Add Comment
+                </h3>
+
+                <form method="POST" action="/ejs/blog/<%= blog._id %>/comment">
+
+                    <textarea name="comment" rows="5" placeholder="Write your comment..." required></textarea>
+
+                    <button type="submit" class="button">
+                        Add Comment
+                    </button>
+
+                </form>
+
+            </section>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

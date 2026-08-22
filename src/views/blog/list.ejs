@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Blogs
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="nav-brand">
+            Blog Platform
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/ejs/dashboard">
+                Dashboard
+            </a>
+
+            <a href="/ejs/blogs">
+                Blogs
+            </a>
+
+            <a href="/ejs/change-password">
+                Change Password
+            </a>
+
+            <a href="/ejs/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    Blogs
+                </h1>
+
+                <p class="muted">
+                    Welcome <%= user.name %>
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <% if (blogs.length===0) { %>
+
+            <div class="empty-state">
+
+                <h2>
+                    No blogs found
+                </h2>
+
+            </div>
+
+            <% } %>
+
+
+                <div class="blog-grid">
+
+                    <% blogs.forEach((blog)=> { %>
+
+                        <article class="blog-card">
+
+                            <div class="blog-status-row">
+
+                                <span class="status-badge">
+                                    <%= blog.status %>
+                                </span>
+
+                                <span class="category">
+                                    <%= blog.category?.name || "No Category" %>
+                                </span>
+
+                            </div>
+
+
+                            <h2>
+                                <%= blog.title %>
+                            </h2>
+
+
+                            <p>
+                                <%= blog.content.substring( 0, 160 ) %>
+                                    <% if (blog.content.length> 160) { %>
+                                        ...
+                                        <% } %>
+                            </p>
+
+
+                            <div class="blog-meta">
+
+                                <span>
+                                    Author:
+                                    <%= blog.author?.name || "Unknown" %>
+                                </span>
+
+                                <span>
+                                    Likes:
+                                    <%= blog.likes.length %>
+                                </span>
+
+                                <span>
+                                    Comments:
+                                    <%= blog.comments.length %>
+                                </span>
+
+                            </div>
+
+
+                            <div class="card-actions">
+
+                                <a href="/ejs/blog/<%= blog._id %>" class="button">
+                                    Read
+                                </a>
+
+
+                                <% if ( user.role==="admin" || user.role==="writer" ) { %>
+
+                                    <% if ( user.role==="admin" || ( blog.author &&
+                                        blog.author._id.toString()===user._id.toString() ) ) { %>
+
+                                        <a href="/ejs/blog/<%= blog._id %>/edit" class="button secondary">
+                                            Edit
+                                        </a>
+
+                                        <form method="POST" action="/ejs/blog/<%= blog._id %>/delete"
+                                            onsubmit="return confirm('Delete this blog?')">
+
+                                            <button type="submit" class="button danger">
+                                                Delete
+                                            </button>
+
+                                        </form>
+
+                                        <% } %>
+
+                                            <% } %>
+
+
+                                                <% if ( user.role==="admin" && blog.status==="pending" ) { %>
+
+                                                    <form method="POST" action="/ejs/blog/<%= blog._id %>/approve">
+
+                                                        <button type="submit" class="button success-btn">
+                                                            Approve
+                                                        </button>
+
+                                                    </form>
+
+
+                                                    <form method="POST" action="/ejs/blog/<%= blog._id %>/reject">
+
+                                                        <button type="submit" class="button danger">
+                                                            Reject
+                                                        </button>
+
+                                                    </form>
+
+                                                    <% } %>
+
+                            </div>
+
+                        </article>
+
+                        <% }) %>
+
+                </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,4 +1,6 @@
 const jwt = require("jsonwebtoken");
+const bcryptjs = require("bcryptjs");
+const User = require("../models/User");
 
 class AuthMiddleware {
   static verifyToken(req, res) {
@@ -43,28 +45,66 @@ class AuthMiddleware {
     }
   }
 
-  static verifySecretKey(req) {
-    const secretKey = req.headers["x-secret-key"];
+  static async verifySecretKey(req) {
+    try {
+      const secretKey = req.headers["x-secret-key"];
 
-    if (!secretKey) {
+      if (!secretKey) {
+        return {
+          success: false,
+          status: 401,
+          message: "Secret key required",
+        };
+      }
+
+      if (!req.user || !req.user.id) {
+        return {
+          success: false,
+          status: 401,
+          message: "User information missing from token",
+        };
+      }
+
+      const user = await User.findById(req.user.id);
+
+      if (!user) {
+        return {
+          success: false,
+          status: 404,
+          message: "User not found",
+        };
+      }
+
+      if (!user.secretKeyHash) {
+        return {
+          success: false,
+          status: 403,
+          message: "Secret key is not configured for this user",
+        };
+      }
+
+      const isValid = await bcryptjs.compare(secretKey, user.secretKeyHash);
+
+      if (!isValid) {
+        return {
+          success: false,
+          status: 403,
+          message: "Invalid secret key",
+        };
+      }
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      console.error("Secret key verification error:", error);
+
       return {
         success: false,
-        status: 401,
-        message: "Blog secret key required",
+        status: 500,
+        message: "Secret key verification failed",
       };
     }
-
-    if (secretKey !== process.env.BLOG_SECRET_KEY) {
-      return {
-        success: false,
-        status: 403,
-        message: "Invalid blog secret key",
-      };
-    }
-
-    return {
-      success: true,
-    };
   }
 }
 

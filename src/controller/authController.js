@@ -5,8 +5,7 @@ const User = require("../models/User");
 const Category = require("../models/category");
 const AuthMiddleware = require("../middleware/authMiddleware");
 const Validation = require("../validate/index");
-
-
+const crypto = require("crypto");
 
 class BlogController {
   static async blogHandler(req, res) {
@@ -224,7 +223,18 @@ class BlogController {
           });
         }
 
+        
+        const secretKey = crypto.randomBytes(32).toString("hex");
+
+        // =================================================
+        // HASH SECRET KEY
+        // =================================================
+
+        const secretKeyHash = await bcryptjs.hash(secretKey, 10);
+
+        // =================================================
         // ACCESS TOKEN
+        // =================================================
 
         const accessToken = jwt.sign(
           {
@@ -238,7 +248,9 @@ class BlogController {
           },
         );
 
+        // =================================================
         // REFRESH TOKEN
+        // =================================================
 
         const refreshToken = jwt.sign(
           {
@@ -251,17 +263,20 @@ class BlogController {
         );
 
         user.refreshToken = refreshToken;
+        user.secretKeyHash = secretKeyHash;
 
         await user.save();
+
+        // =================================================
+        // RESPONSE
+        // =================================================
 
         return res.status(200).json({
           success: true,
           message: "Login successful",
-
           accessToken,
-
           refreshToken,
-
+          secretKey,
           user: {
             id: user._id,
             name: user.name,
@@ -349,6 +364,7 @@ class BlogController {
         }
 
         user.refreshToken = null;
+        user.secretKeyHash = null;
 
         await user.save();
 
@@ -375,7 +391,7 @@ class BlogController {
       // SECRET KEY
       // =====================================================
 
-      const secretResult = AuthMiddleware.verifySecretKey(req);
+      const secretResult = await AuthMiddleware.verifySecretKey(req);
 
       if (!secretResult.success) {
         return res.status(secretResult.status).json({
@@ -728,7 +744,6 @@ class BlogController {
           message: "You are not allowed to delete blogs",
         });
       }
-
     } catch (error) {
       console.error(error);
 

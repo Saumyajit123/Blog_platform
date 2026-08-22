@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Forgot Password
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+    <div class="auth-page">
+
+        <div class="auth-card">
+
+            <h1>
+                Forgot Password
+            </h1>
+
+            <p class="muted">
+                Enter your email to receive a
+                password reset link.
+            </p>
+
+
+            <% if (error) { %>
+
+                <div class="alert error">
+                    <%= error %>
+                </div>
+
+                <% } %>
+
+
+                    <% if (success) { %>
+
+                        <div class="alert success">
+                            <%= success %>
+                        </div>
+
+                        <% } %>
+
+
+                            <form method="POST" action="/ejs/forgot-password">
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Email
+                                    </label>
+
+                                    <input type="email" name="email" placeholder="Enter your email" required>
+
+                                </div>
+
+
+                                <button type="submit" class="btn">
+                                    Send Reset Link
+                                </button>
+
+                            </form>
+
+
+                            <div class="auth-links">
+
+                                <a href="/ejs/login">
+                                    Back to Login
+                                </a>
+
+                            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

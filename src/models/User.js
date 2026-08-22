@@ -31,12 +31,27 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+
+    resetTokenHash: {
+      type: String,
+      default: null,
+    },
+
+    resetTokenExpires: {
+      type: Date,
+      default: null,
+    },
+
+    secretKeyHash: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
   },
 );
 
-const UserModel = mongoose.model("User", userSchema);
+const UserModel = mongoose.models.User || mongoose.model("User", userSchema);
 
 module.exports = UserModel;

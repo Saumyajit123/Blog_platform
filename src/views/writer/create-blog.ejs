@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Create Blog
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="nav-brand">
+            Writer Panel
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/ejs/dashboard">
+                Dashboard
+            </a>
+
+            <a href="/ejs/blogs">
+                My Blogs
+            </a>
+
+            <a href="/ejs/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container">
+
+        <div class="page-card">
+
+            <h1>
+                Create Blog
+            </h1>
+
+            <% if (error) { %>
+
+                <div class="alert error">
+                    <%= error %>
+                </div>
+
+                <% } %>
+
+                    <% if (success) { %>
+
+                        <div class="alert success">
+                            <%= success %>
+                        </div>
+
+                        <% } %>
+
+
+                            <form method="POST" action="/ejs/blog/create">
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Title
+                                    </label>
+
+                                    <input type="text" name="title" required>
+
+                                </div>
+
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Category
+                                    </label>
+
+                                    <select name="category" required>
+
+                                        <option value="">
+                                            Select Category
+                                        </option>
+
+                                        <% categories.forEach((category)=> { %>
+
+                                            <option value="<%= category._id %>">
+                                                <%= category.name %>
+                                            </option>
+
+                                            <% }) %>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Content
+                                    </label>
+
+                                    <textarea name="content" rows="12" required></textarea>
+
+                                </div>
+
+
+                                <button type="submit" class="btn">
+                                    Submit Blog
+                                </button>
+
+                            </form>
+
+                            <p class="muted">
+                                Writer blogs require admin approval
+                                before publication.
+                            </p>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

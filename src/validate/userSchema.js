@@ -1,10 +1,18 @@
 const Joi = require("joi");
 
+// =====================================================
+// MONGODB OBJECT ID
+// =====================================================
+
 const objectId = Joi.string()
   .pattern(/^[0-9a-fA-F]{24}$/)
   .messages({
     "string.pattern.base": "Invalid ID format",
   });
+
+// =====================================================
+// PASSWORD
+// =====================================================
 
 const passwordSchema = Joi.string().min(8).max(30).required().messages({
   "string.empty": "Password is required",
@@ -13,8 +21,27 @@ const passwordSchema = Joi.string().min(8).max(30).required().messages({
   "any.required": "Password is required",
 });
 
+// =====================================================
+// CONFIRM PASSWORD
+// =====================================================
+
+const confirmPasswordSchema = Joi.any()
+  .valid(Joi.ref("newPassword"))
+  .required()
+  .messages({
+    "any.only": "Confirm password must match new password",
+    "any.required": "Confirm password is required",
+  });
+
+// =====================================================
+// USER SCHEMA
+// =====================================================
+
 const userSchema = {
-  //Register
+  // ===================================================
+  // API REGISTER
+  // ===================================================
+
   register: Joi.object({
     action: Joi.string().valid("register").required(),
 
@@ -34,7 +61,10 @@ const userSchema = {
     password: passwordSchema,
   }),
 
-  //Create Admin:
+  // ===================================================
+  // API CREATE ADMIN
+  // ===================================================
+
   createAdmin: Joi.object({
     action: Joi.string().valid("create-admin").required(),
 
@@ -59,7 +89,10 @@ const userSchema = {
     }),
   }),
 
-  //Create Writer
+  // ===================================================
+  // API CREATE WRITER
+  // ===================================================
+
   createWriter: Joi.object({
     action: Joi.string().valid("create-writer").required(),
 
@@ -84,7 +117,10 @@ const userSchema = {
     }),
   }),
 
-  //Login:
+  // ===================================================
+  // API LOGIN
+  // ===================================================
+
   login: Joi.object({
     action: Joi.string().valid("login").required(),
 
@@ -100,7 +136,52 @@ const userSchema = {
     }),
   }),
 
-  //Refresh token:
+  // ===================================================
+  // FORGOT PASSWORD
+  // ===================================================
+
+  forgotPassword: Joi.object({
+    email: Joi.string().trim().lowercase().email().required().messages({
+      "string.empty": "Email is required",
+      "string.email": "Please enter a valid email",
+      "any.required": "Email is required",
+    }),
+  }),
+
+  // ===================================================
+  // RESET PASSWORD
+  // ===================================================
+
+  resetPassword: Joi.object({
+    token: Joi.string().trim().required().messages({
+      "string.empty": "Reset token is required",
+      "any.required": "Reset token is required",
+    }),
+
+    newPassword: passwordSchema,
+
+    confirmPassword: confirmPasswordSchema,
+  }),
+
+  // ===================================================
+  // CHANGE PASSWORD
+  // ===================================================
+
+  changePassword: Joi.object({
+    currentPassword: Joi.string().required().messages({
+      "string.empty": "Current password is required",
+      "any.required": "Current password is required",
+    }),
+
+    newPassword: passwordSchema,
+
+    confirmPassword: confirmPasswordSchema,
+  }),
+
+  // ===================================================
+  // API REFRESH TOKEN
+  // ===================================================
+
   refresh: Joi.object({
     action: Joi.string().valid("refresh").required(),
 
@@ -110,12 +191,18 @@ const userSchema = {
     }),
   }),
 
-  //Logout:
+  // ===================================================
+  // API LOGOUT
+  // ===================================================
+
   logout: Joi.object({
     action: Joi.string().valid("logout").required(),
   }),
 
-  //Create category:
+  // ===================================================
+  // API CREATE CATEGORY
+  // ===================================================
+
   createCategory: Joi.object({
     action: Joi.string().valid("create-category").required(),
 
@@ -127,7 +214,10 @@ const userSchema = {
     }),
   }),
 
-  //Create blog:
+  // ===================================================
+  // API CREATE BLOG
+  // ===================================================
+
   createBlog: Joi.object({
     title: Joi.string().trim().min(3).max(200).required().messages({
       "string.empty": "Title is required",
@@ -147,7 +237,10 @@ const userSchema = {
     }),
   }),
 
-  //Like:
+  // ===================================================
+  // API LIKE BLOG
+  // ===================================================
+
   likeBlog: Joi.object({
     action: Joi.string().valid("like").required(),
 
@@ -156,7 +249,10 @@ const userSchema = {
     }),
   }),
 
-  //Comment:
+  // ===================================================
+  // API COMMENT
+  // ===================================================
+
   commentBlog: Joi.object({
     action: Joi.string().valid("comment").required(),
 
@@ -171,7 +267,10 @@ const userSchema = {
     }),
   }),
 
-  //Update blog:
+  // ===================================================
+  // API UPDATE BLOG
+  // ===================================================
+
   updateBlog: Joi.object({
     blogId: objectId.required().messages({
       "any.required": "Blog ID is required",
@@ -186,19 +285,149 @@ const userSchema = {
     action: Joi.string().optional(),
   }),
 
-  //Delete blog:
+  // ===================================================
+  // API DELETE BLOG
+  // ===================================================
+
   deleteBlog: Joi.object({
     blogId: objectId.required().messages({
       "any.required": "Blog ID is required",
     }),
   }),
 
-  //Approve blog:
+  // ===================================================
+  // API APPROVE / REJECT
+  // ===================================================
+
   blogAction: Joi.object({
     action: Joi.string().valid("approve", "reject").required(),
 
     blogId: objectId.required().messages({
       "any.required": "Blog ID is required",
+    }),
+  }),
+
+  // ===================================================
+  // EJS CREATE USER
+  // ADMIN ONLY
+  // ===================================================
+
+  ejsCreateUser: Joi.object({
+    name: Joi.string().trim().min(2).max(50).required().messages({
+      "string.empty": "Name is required",
+      "string.min": "Name must be at least 2 characters",
+      "string.max": "Name must not exceed 50 characters",
+      "any.required": "Name is required",
+    }),
+
+    email: Joi.string().trim().lowercase().email().required().messages({
+      "string.empty": "Email is required",
+      "string.email": "Please enter a valid email",
+      "any.required": "Email is required",
+    }),
+
+    password: passwordSchema,
+
+    role: Joi.string().valid("writer", "user").required().messages({
+      "any.only": "Role must be either writer or user",
+      "any.required": "Role is required",
+    }),
+  }),
+
+  // ===================================================
+  // EJS CREATE CATEGORY
+  // ===================================================
+
+  ejsCreateCategory: Joi.object({
+    name: Joi.string().trim().min(2).max(50).required().messages({
+      "string.empty": "Category name is required",
+      "string.min": "Category name must be at least 2 characters",
+      "string.max": "Category name must not exceed 50 characters",
+      "any.required": "Category name is required",
+    }),
+  }),
+
+  // ===================================================
+  // EJS CREATE BLOG
+  // ===================================================
+
+  ejsCreateBlog: Joi.object({
+    title: Joi.string().trim().min(3).max(200).required().messages({
+      "string.empty": "Title is required",
+      "string.min": "Title must be at least 3 characters",
+      "string.max": "Title must not exceed 200 characters",
+      "any.required": "Title is required",
+    }),
+
+    content: Joi.string().trim().min(10).required().messages({
+      "string.empty": "Content is required",
+      "string.min": "Content must be at least 10 characters",
+      "any.required": "Content is required",
+    }),
+
+    category: objectId.required().messages({
+      "any.required": "Category is required",
+    }),
+  }),
+
+  // ===================================================
+  // EJS UPDATE BLOG
+  // ===================================================
+
+  ejsUpdateBlog: Joi.object({
+    blogId: objectId.required().messages({
+      "any.required": "Blog ID is required",
+    }),
+
+    title: Joi.string().trim().min(3).max(200).required().messages({
+      "string.empty": "Title is required",
+      "string.min": "Title must be at least 3 characters",
+      "string.max": "Title must not exceed 200 characters",
+      "any.required": "Title is required",
+    }),
+
+    content: Joi.string().trim().min(10).required().messages({
+      "string.empty": "Content is required",
+      "string.min": "Content must be at least 10 characters",
+      "any.required": "Content is required",
+    }),
+
+    category: objectId.required().messages({
+      "any.required": "Category is required",
+    }),
+  }),
+
+  // ===================================================
+  // EJS COMMENT
+  // ===================================================
+
+  ejsCommentBlog: Joi.object({
+    comment: Joi.string().trim().min(1).max(1000).required().messages({
+      "string.empty": "Comment is required",
+      "string.min": "Comment cannot be empty",
+      "string.max": "Comment must not exceed 1000 characters",
+      "any.required": "Comment is required",
+    }),
+  }),
+
+  // ===================================================
+  // EJS BLOG ID
+  // ===================================================
+
+  ejsBlogId: Joi.object({
+    blogId: objectId.required().messages({
+      "any.required": "Blog ID is required",
+    }),
+  }),
+
+  // ===================================================
+  // EJS USER ID
+  // Used by Admin when sending password email
+  // ===================================================
+
+  ejsUserId: Joi.object({
+    userId: objectId.required().messages({
+      "any.required": "User ID is required",
     }),
   }),
 };

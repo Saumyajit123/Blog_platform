@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Create Category
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+    <div class="container small-container">
+
+        <div class="page-card">
+
+            <h1>
+                Create Category
+            </h1>
+
+
+            <% if (error) { %>
+
+                <div class="alert error">
+                    <%= error %>
+                </div>
+
+                <% } %>
+
+
+                    <% if (success) { %>
+
+                        <div class="alert success">
+                            <%= success %>
+                        </div>
+
+                        <% } %>
+
+
+                            <form method="POST" action="/ejs/category/create">
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Category Name
+                                    </label>
+
+                                    <input type="text" name="name" required>
+
+                                </div>
+
+
+                                <button type="submit" class="btn">
+                                    Create Category
+                                </button>
+
+                            </form>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

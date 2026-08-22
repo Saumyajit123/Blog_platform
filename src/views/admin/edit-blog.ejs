@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Edit Blog
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="nav-brand">
+            Admin Panel
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/ejs/dashboard">
+                Dashboard
+            </a>
+
+            <a href="/ejs/blogs">
+                Blogs
+            </a>
+
+            <a href="/ejs/admin/users">
+                Users
+            </a>
+
+            <a href="/ejs/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container small-container">
+
+        <div class="page-card">
+
+            <h1>
+                Edit Blog
+            </h1>
+
+
+            <% if (error) { %>
+
+                <div class="alert error">
+                    <%= error %>
+                </div>
+
+                <% } %>
+
+
+                    <% if (success) { %>
+
+                        <div class="alert success">
+                            <%= success %>
+                        </div>
+
+                        <% } %>
+
+
+                            <form method="POST" action="/ejs/blog/<%= blog._id %>/edit">
+
+                                <!-- BLOG ID -->
+
+                                <input type="hidden" name="blogId" value="<%= blog._id %>">
+
+
+                                <!-- TITLE -->
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Blog Title
+                                    </label>
+
+                                    <input type="text" name="title" value="<%= blog.title %>" required>
+
+                                </div>
+
+
+                                <!-- CATEGORY -->
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Category
+                                    </label>
+
+                                    <select name="category" required>
+
+                                        <option value="">
+                                            Select Category
+                                        </option>
+
+
+                                        <% categories.forEach((category)=> { %>
+
+                                            <option value="<%= category._id %>"
+                                                <%=String(blog.category)===String(category._id) ? "selected" : "" %>
+                                                >
+
+                                                <%= category.name %>
+
+                                            </option>
+
+                                            <% }) %>
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- CONTENT -->
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Content
+                                    </label>
+
+                                    <textarea name="content" rows="12" required><%= blog.content %></textarea>
+
+                                </div>
+
+
+                                <button type="submit" class="btn">
+                                    Update Blog
+                                </button>
+
+
+                                <a href="/ejs/blogs" class="button secondary" style="margin-top: 10px;">
+                                    Cancel
+                                </a>
+
+                            </form>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

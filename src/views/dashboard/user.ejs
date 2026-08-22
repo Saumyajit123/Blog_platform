@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        User Dashboard
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="nav-brand">
+            Blog Platform
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/ejs/dashboard">
+                Dashboard
+            </a>
+
+            <a href="/ejs/blogs">
+                Blogs
+            </a>
+
+            <a href="/ejs/change-password">
+                Change Password
+            </a>
+
+            <a href="/ejs/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    User Dashboard
+                </h1>
+
+                <p class="muted">
+                    Welcome <%= user.name %>
+                </p>
+
+            </div>
+
+            <span class="role-badge user">
+                User
+            </span>
+
+        </div>
+
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <span>
+                    Published Blogs
+                </span>
+
+                <strong>
+                    <%= publishedBlogs %>
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-actions">
+
+            <a href="/ejs/blogs" class="button">
+                Browse Blogs
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

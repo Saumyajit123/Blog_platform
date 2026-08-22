@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Manage Users
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="nav-brand">
+            Admin Panel
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/ejs/dashboard">
+                Dashboard
+            </a>
+
+            <a href="/ejs/blogs">
+                Blogs
+            </a>
+
+            <a href="/ejs/admin/users">
+                Users
+            </a>
+
+            <a href="/ejs/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    User Management
+                </h1>
+
+                <p class="muted">
+                    Create users and send password-change emails.
+                </p>
+
+            </div>
+
+            <a href="/ejs/admin/users/create" class="button">
+                Create Writer / User
+            </a>
+
+        </div>
+
+
+        <% if (message) { %>
+
+            <div class="alert success">
+                <%= message %>
+            </div>
+
+            <% } %>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Name
+                                </th>
+
+                                <th>
+                                    Email
+                                </th>
+
+                                <th>
+                                    Role
+                                </th>
+
+                                <th>
+                                    Created
+                                </th>
+
+                                <th>
+                                    Password Email
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            <% users.forEach((item)=> { %>
+
+                                <tr>
+
+                                    <td>
+                                        <%= item.name %>
+                                    </td>
+
+                                    <td>
+                                        <%= item.email %>
+                                    </td>
+
+                                    <td>
+
+                                        <span class="role-badge <%= item.role %>">
+                                            <%= item.role %>
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+                                        <%= new Date( item.createdAt ).toLocaleDateString() %>
+                                    </td>
+
+                                    <td>
+
+                                        <% if ( item.role==="writer" || item.role==="user" ) { %>
+
+                                            <form method="POST" action="/ejs/admin/users/send-password-email"
+                                                onsubmit="return confirm('Send password-change email?')">
+
+                                                <input type="hidden" name="userId" value="<%= item._id %>">
+
+                                                <button type="submit" class="button small">
+                                                    Send Email
+                                                </button>
+
+                                            </form>
+
+                                            <% } else { %>
+
+                                                <span class="muted">
+                                                    Admin
+                                                </span>
+
+                                                <% } %>
+
+                                    </td>
+
+                                </tr>
+
+                                <% }) %>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -4,6 +4,7 @@ const DBConnect = require("./src/config/dbconnect");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
+const path = require('path');
 
 DBConnect();
 
@@ -16,7 +17,7 @@ app.use(cors());
 app.use(cookieParser());
 app.use(
   session({
-    secret: process.env.BLOG_SECRET_KEY,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -25,12 +26,27 @@ app.use(
   }),
 );
 
+// =====================================================
+// STATIC FILES
+// =====================================================
+
+app.use(express.static(path.join(__dirname, "public")));
+
+// =====================================================
+// EJS
+// =====================================================
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "src", "views"));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const authRouter = require("./src/router/authRouter");
-app.use('/api/blog', authRouter);
+app.use("/api/blog", authRouter);
 
+const authEjsRouter = require("./src/router/authEJSRouter");
+app.use("/ejs", authEjsRouter);
 
 app.listen(Port, () => {
   console.log(`Server is running on port: ${Port}`);

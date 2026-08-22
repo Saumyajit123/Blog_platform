@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Change Password
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="nav-brand">
+            Blog Platform
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/ejs/dashboard">
+                Dashboard
+            </a>
+
+            <a href="/ejs/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container small-container">
+
+        <div class="page-card">
+
+            <h1>
+                Change Password
+            </h1>
+
+            <p class="muted">
+                Logged in as:
+                <strong>
+                    <%= user.email %>
+                </strong>
+            </p>
+
+
+            <% if (error) { %>
+
+                <div class="alert error">
+                    <%= error %>
+                </div>
+
+                <% } %>
+
+
+                    <% if (success) { %>
+
+                        <div class="alert success">
+                            <%= success %>
+                        </div>
+
+                        <% } %>
+
+
+                            <form method="POST" action="/ejs/change-password">
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Current Password
+                                    </label>
+
+                                    <input type="password" name="currentPassword" placeholder="Current password"
+                                        required>
+
+                                </div>
+
+
+                                <div class="form-group">
+
+                                    <label>
+                                        New Password
+                                    </label>
+
+                                    <input type="password" name="newPassword" placeholder="New password" required>
+
+                                </div>
+
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Confirm New Password
+                                    </label>
+
+                                    <input type="password" name="confirmPassword" placeholder="Confirm new password"
+                                        required>
+
+                                </div>
+
+
+                                <button type="submit" class="btn">
+                                    Change Password
+                                </button>
+
+                            </form>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

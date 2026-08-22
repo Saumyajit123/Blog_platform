@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>
+        Blog Platform - Login
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <div class="auth-page">
+
+        <div class="auth-card">
+
+            <h1>
+                Blog Platform
+            </h1>
+
+            <h2>
+                Login
+            </h2>
+
+
+            <% if (error) { %>
+
+                <div class="alert error">
+                    <%= error %>
+                </div>
+
+                <% } %>
+
+
+                    <% if (success) { %>
+
+                        <div class="alert success">
+                            <%= success %>
+                        </div>
+
+                        <% } %>
+
+
+                            <form method="POST" action="/ejs/login">
+
+                                <!-- Required by userSchema.login -->
+                                <input type="hidden" name="action" value="login">
+
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Email
+                                    </label>
+
+                                    <input type="email" name="email" placeholder="Enter your email" required>
+
+                                </div>
+
+
+                                <div class="form-group">
+
+                                    <label>
+                                        Password
+                                    </label>
+
+                                    <input type="password" name="password" placeholder="Enter your password" required>
+
+                                </div>
+
+
+                                <button type="submit" class="btn">
+                                    Login
+                                </button>
+
+                            </form>
+
+
+                            <div class="auth-links">
+
+                                <a href="/ejs/forgot-password">
+                                    Forgot Password?
+                                </a>
+
+                            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

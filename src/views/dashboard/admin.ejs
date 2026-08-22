@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Admin Dashboard
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="nav-brand">
+            Blog Platform
+        </div>
+
+
+        <div class="nav-links">
+
+            <a href="/ejs/dashboard">
+                Dashboard
+            </a>
+
+            <a href="/ejs/blogs">
+                Blogs
+            </a>
+
+            <a href="/ejs/admin/users">
+                Users
+            </a>
+
+            <a href="/ejs/blog/create">
+                Create Blog
+            </a>
+
+            <a href="/ejs/category/create">
+                Category
+            </a>
+
+            <a href="/ejs/change-password">
+                Change Password
+            </a>
+
+            <a href="/ejs/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    Admin Dashboard
+                </h1>
+
+                <p class="muted">
+                    Welcome <%= user.name %>
+                </p>
+
+            </div>
+
+            <span class="role-badge admin">
+                Admin
+            </span>
+
+        </div>
+
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <span>
+                    Total Users
+                </span>
+
+                <strong>
+                    <%= totalUsers %>
+                </strong>
+            </div>
+
+
+            <div class="stat-card">
+                <span>
+                    Writers
+                </span>
+
+                <strong>
+                    <%= totalWriters %>
+                </strong>
+            </div>
+
+
+            <div class="stat-card">
+                <span>
+                    Normal Users
+                </span>
+
+                <strong>
+                    <%= totalNormalUsers %>
+                </strong>
+            </div>
+
+
+            <div class="stat-card">
+                <span>
+                    Total Blogs
+                </span>
+
+                <strong>
+                    <%= totalBlogs %>
+                </strong>
+            </div>
+
+
+            <div class="stat-card">
+                <span>
+                    Published
+                </span>
+
+                <strong>
+                    <%= publishedBlogs %>
+                </strong>
+            </div>
+
+
+            <div class="stat-card">
+                <span>
+                    Pending
+                </span>
+
+                <strong>
+                    <%= pendingBlogs %>
+                </strong>
+            </div>
+
+
+            <div class="stat-card">
+                <span>
+                    Rejected
+                </span>
+
+                <strong>
+                    <%= rejectedBlogs %>
+                </strong>
+            </div>
+
+
+            <div class="stat-card">
+                <span>
+                    Categories
+                </span>
+
+                <strong>
+                    <%= totalCategories %>
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-actions">
+
+            <a href="/ejs/admin/users" class="button">
+                Manage Users
+            </a>
+
+            <a href="/ejs/blog/create" class="button">
+                Create Blog
+            </a>
+
+            <a href="/ejs/category/create" class="button">
+                Create Category
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
