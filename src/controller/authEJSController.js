@@ -3,11 +3,12 @@ const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 
-const User = require("../models/user");
+const User = require("../models/User");
 const Blog = require("../models/blog");
 const Category = require("../models/category");
 const sendMail = require("../config/mail");
 const userSchema = require("../validate/userSchema");
+const { title } = require("process");
 
 class AuthEJSController {
   // ================================
@@ -18,6 +19,7 @@ class AuthEJSController {
     const resetSuccess = req.query.reset === "success";
 
     res.render("auth/login", {
+      title: "Blog Platform - Login",
       error: null,
       success: resetSuccess
         ? "Password changed successfully. Please login."
@@ -114,6 +116,7 @@ class AuthEJSController {
         });
         const totalCategories = await Category.countDocuments();
         return res.render("dashboard/admin", {
+          title: "Admin dashboard",
           user,
           totalUsers,
           totalWriters,
@@ -149,6 +152,7 @@ class AuthEJSController {
         });
 
         return res.render("dashboard/writer", {
+          title: "Writer Dashboard",
           user,
           totalBlogs,
           publishedBlogs,
@@ -164,6 +168,7 @@ class AuthEJSController {
       });
 
       return res.render("dashboard/user", {
+        title: "User Dashboard",
         user,
         publishedBlogs,
       });
@@ -182,6 +187,7 @@ class AuthEJSController {
 
   static changePasswordPage(req, res) {
     res.render("password/change", {
+      title: "Change Password",
       user: req.ejsUser,
       error: null,
       success: null,
@@ -259,6 +265,7 @@ class AuthEJSController {
 
   static forgotPasswordPage(req, res) {
     res.render("password/forgot", {
+      title: "Forgot Password Page",
       error: null,
       success: null,
     });
@@ -372,6 +379,7 @@ class AuthEJSController {
     }
 
     return res.render("password/reset", {
+      title: "Reset Password Page",
       token,
       error: null,
       success: null,
@@ -457,6 +465,7 @@ class AuthEJSController {
           createdAt: -1,
         });
       return res.render("admin/users", {
+        title: "Manage Users",
         user: req.ejsUser,
         users,
         message:
@@ -479,6 +488,7 @@ class AuthEJSController {
 
   static createUserPage(req, res) {
     return res.render("admin/create-user", {
+      title: "Create User",
       user: req.ejsUser,
       error: null,
       success: null,
@@ -639,6 +649,7 @@ class AuthEJSController {
 
   static async createCategoryPage(req, res) {
     return res.render(`${req.ejsUser.role}/create-category`, {
+      title: "Create Category",
       user: req.ejsUser,
       error: null,
       success: null,
@@ -699,6 +710,7 @@ class AuthEJSController {
           : "writer/create-blog";
 
       return res.render(view, {
+        title: "Create Blog",
         user: req.ejsUser,
         categories,
         error: null,
@@ -734,6 +746,7 @@ class AuthEJSController {
       });
 
       return res.render(`${req.ejsUser.role}/create-blog`, {
+        title: "Create Blog",
         user: req.ejsUser,
         categories,
         error: null,
@@ -800,6 +813,7 @@ class AuthEJSController {
       }
 
       return res.render("blog/list", {
+        title: "Blogs",
         user: req.ejsUser,
         blogs,
       });
@@ -850,6 +864,7 @@ class AuthEJSController {
       }
 
       return res.render("blog/detail", {
+        title: "Blog Details",
         user: req.ejsUser,
         blog,
       });
@@ -924,6 +939,7 @@ class AuthEJSController {
       // -------------------------------------------------
 
       return res.render(view, {
+        title: "Edit Blog",
         user: req.ejsUser,
         blog,
         categories,

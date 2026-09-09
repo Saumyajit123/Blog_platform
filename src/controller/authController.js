@@ -17,21 +17,21 @@ class BlogController {
       // JOI VALIDATION
       // =====================================================
 
-      const schema = Validation.getSchema(method, action);
+      // const schema = Validation.getSchema(method, action);
 
-      if (schema) {
-        const result = Validation.run(schema, req.body);
+      // if (schema) {
+      //   const result = Validation.run(schema, req.body);
 
-        if (!result.success) {
-          return res.status(400).json({
-            success: false,
-            errors: result.errors,
-          });
-        }
+      //   if (!result.success) {
+      //     return res.status(400).json({
+      //       success: false,
+      //       errors: result.errors,
+      //     });
+      //   }
 
-        // Joi cleaned the request body
-        req.body = result.value;
-      }
+      //   // Joi cleaned the request body
+      //   req.body = result.value;
+      // }
 
       // =====================================================
       // REGISTER
@@ -374,10 +374,6 @@ class BlogController {
         });
       }
 
-      // =====================================================
-      // AUTHENTICATE NORMAL BLOG REQUEST
-      // =====================================================
-
       const authResult = AuthMiddleware.verifyToken(req);
 
       if (!authResult.success) {
@@ -403,7 +399,6 @@ class BlogController {
       const { id, role } = req.user;
 
       // =====================================================
-      // POST
       // CREATE / LIKE / COMMENT
       // =====================================================
 
@@ -562,7 +557,6 @@ class BlogController {
       }
 
       // =====================================================
-      // PUT
       // UPDATE / APPROVE / REJECT
       // =====================================================
 
