@@ -70,82 +70,78 @@
 
                         <% } %>
 
-
-                            <form method="POST" action="/ejs/blog/<%= blog._id %>/edit">
-
-                                <!-- BLOG ID -->
-
+                            <form action="/ejs/blog/<%= blog._id %>/edit" method="POST" enctype="multipart/form-data">
                                 <input type="hidden" name="blogId" value="<%= blog._id %>">
-
-
-                                <!-- TITLE -->
-
                                 <div class="form-group">
-
-                                    <label>
-                                        Blog Title
-                                    </label>
-
-                                    <input type="text" name="title" value="<%= blog.title %>" required>
-
+                                    <label for="title">Blog title</label>
+                                    <input type="text" id="title" name="title" value="<%= blog.title %>" required>
                                 </div>
 
-
-                                <!-- CATEGORY -->
-
                                 <div class="form-group">
-
-                                    <label>
-                                        Category
-                                    </label>
-
-                                    <select name="category" required>
-
-                                        <option value="">
-                                            Select Category
-                                        </option>
-
+                                    <label for="category">Category</label>
+                                    <select id="category" name="category" required>
+                                        <option value="">Select Category</option>
 
                                         <% categories.forEach((category)=> { %>
-
-                                            <option value="<%= category._id %>"
-                                                <%=String(blog.category)===String(category._id) ? "selected" : "" %>
+                                            <option value="<%= category._id %>" <%=String(blog.category?._id ||
+                                                blog.category)===String(category._id) ? "selected" : "" %>
                                                 >
-
                                                 <%= category.name %>
-
                                             </option>
-
                                             <% }) %>
-
                                     </select>
-
                                 </div>
-
-
-                                <!-- CONTENT -->
 
                                 <div class="form-group">
-
-                                    <label>
-                                        Content
-                                    </label>
-
-                                    <textarea name="content" rows="12" required><%= blog.content %></textarea>
-
+                                    <label for="content">Blog content</label>
+                                    <textarea id="content" name="content" rows="8"
+                                        required><%= blog.content %></textarea>
                                 </div>
 
+                                <div class="form-group">
+                                    <label>Current story-card image</label>
 
-                                <button type="submit" class="btn">
-                                    Update Blog
+                                    <% if (blog.image && blog.image.url) { %>
+                                        <img src="<%= blog.image.url %>" alt="Current blog cover"
+                                            style="display:block;width:100%;max-width:320px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;margin:12px 0">
+                                        <% } else { %>
+                                            <p>No cover image uploaded yet.</p>
+                                            <% } %>
+
+                                                <label for="image">Replace cover image (optional)</label>
+                                                <input type="file" id="image" name="image"
+                                                    accept="image/jpeg,image/png,image/webp">
+
+                                                <img id="imagePreview" alt="New cover preview"
+                                                    style="display:none;max-width:320px;margin-top:15px;border-radius:10px">
+
+                                                <small>Leave empty to keep the current cover image.</small>
+                                </div>
+
+                                <button type="submit" class="button">
+                                    Save Changes
                                 </button>
-
-
-                                <a href="/ejs/blogs" class="button secondary" style="margin-top: 10px;">
-                                    Cancel
-                                </a>
-
                             </form>
+
+                            <script>
+                                const imageInput = document.getElementById("image");
+                                const imagePreview = document.getElementById("imagePreview");
+
+                                imageInput.addEventListener("change", function () {
+                                    const file = this.files[0];
+
+                                    if (!file) {
+                                        imagePreview.removeAttribute("src");
+                                        imagePreview.style.display = "none";
+                                        return;
+                                    }
+
+                                    imagePreview.src = URL.createObjectURL(file);
+                                    imagePreview.style.display = "block";
+                                });
+                            </script>
+
+
 
         </div>
 

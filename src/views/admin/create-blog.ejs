@@ -66,61 +66,50 @@
 
                         <% } %>
 
-
-                            <form method="POST" action="/ejs/blog/create">
-
+                            <form action="/ejs/blogs/create" method="POST" enctype="multipart/form-data">
                                 <div class="form-group">
-
-                                    <label>
-                                        Title
-                                    </label>
-
-                                    <input type="text" name="title" required>
-
+                                    <label for="title">Blog title</label>
+                                    <input type="text" id="title" name="title" required>
                                 </div>
 
-
                                 <div class="form-group">
-
-                                    <label>
-                                        Category
-                                    </label>
-
-                                    <select name="category" required>
-
-                                        <option value="">
-                                            Select Category
-                                        </option>
-
-                                        <% categories.forEach((category)=> { %>
-
-                                            <option value="<%= category._id %>">
-                                                <%= category.name %>
-                                            </option>
-
-                                            <% }) %>
-
-                                    </select>
-
+                                    <label for="content">Blog content</label>
+                                    <textarea id="content" name="content" rows="8" required></textarea>
                                 </div>
 
-
                                 <div class="form-group">
+                                    <label for="image">Story-card cover image</label>
+                                    <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp">
 
-                                    <label>
-                                        Content
-                                    </label>
+                                    <small>Upload a JPG, PNG, or WebP cover image.</small>
 
-                                    <textarea name="content" rows="12" required></textarea>
-
+                                    <img id="imagePreview" alt="Cover preview"
+                                        style="display:none;max-width:260px;margin-top:15px;border-radius:10px">
                                 </div>
 
-
-                                <button type="submit" class="btn">
-                                    Create Blog
+                                <button type="submit" class="button">
+                                    Publish Blog
                                 </button>
-
                             </form>
+
+                            <script>
+                                const imageInput = document.getElementById("image");
+                                const imagePreview = document.getElementById("imagePreview");
+
+                                imageInput.addEventListener("change", function () {
+                                    const file = this.files[0];
+
+                                    if (!file) {
+                                        imagePreview.removeAttribute("src");
+                                        imagePreview.style.display = "none";
+                                        return;
+                                    }
+
+                                    imagePreview.src = URL.createObjectURL(file);
+                                    imagePreview.style.display = "block";
+                                });
+                            </script>
+
 
         </div>
 

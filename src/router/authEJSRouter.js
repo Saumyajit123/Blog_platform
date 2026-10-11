@@ -3,6 +3,7 @@ const router = express.Router();
 
 const AuthEjsController = require("../controller/authEJSController");
 const EjsAuthMiddleware = require("../middleware/authEJSMiddleware");
+const upload = require("../middleware/uploadMiddleware");
 const Validation = require("../validate");
 const userSchema = require("../validate/userSchema");
 
@@ -138,6 +139,7 @@ router.post(
   "/blog/create",
   EjsAuthMiddleware.requireLogin,
   EjsAuthMiddleware.allowRoles("admin", "writer"),
+  upload.single("image"),
   Validation.validate(userSchema.ejsCreateBlog),
   AuthEjsController.createBlog,
 );
@@ -157,7 +159,8 @@ router.post(
   "/blog/:id/edit",
   EjsAuthMiddleware.requireLogin,
   EjsAuthMiddleware.allowRoles("admin", "writer"),
-  Validation.validate(userSchema.ejsUpdateBlog),
+  upload.single("image"),
+  // Validation.validate(userSchema.ejsUpdateBlog),
   AuthEjsController.updateBlog,
 );
 

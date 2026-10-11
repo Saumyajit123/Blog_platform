@@ -8,7 +8,8 @@ const Blog = require("../models/blog");
 const Category = require("../models/category");
 const sendMail = require("../config/mail");
 const userSchema = require("../validate/userSchema");
-const { title } = require("process");
+const uploadCloudinary = require("../utils/uploadCloudinary");
+const deleteCloudinary = require("../utils/deleteCloudinary");
 
 class AuthEJSController {
   // ================================
@@ -933,20 +934,44 @@ class AuthEJSController {
   //===========================================
 
   static async createBlog(req, res) {
+    let uploadedImage = null;
+
     try {
       const { title, content, category } = req.body;
-      const blog = await Blog.create({
+
+      if (!title || !content || !category) {
+        return res
+          .status(400)
+          .send("Title, content and category are required.");
+      }
+
+      // Upload the selected cover image to Cloudinary.
+      if (req.file) {
+        uploadedImage = await uploadCloudinary(req.file.buffer, "blog-images");
+      }
+
+      await Blog.create({
         title,
         content,
         category,
         author: req.ejsUser._id,
+
+        image: uploadedImage
+          ? {
+              url: uploadedImage.url,
+              public_id: uploadedImage.public_id,
+            }
+          : {
+              url: "",
+              public_id: "",
+            },
+
         status: req.ejsUser.role === "admin" ? "approved" : "pending",
+
         isPublished: req.ejsUser.role === "admin",
       });
 
-      const categories = await Category.find().sort({
-        name: 1,
-      });
+      const categories = await Category.find().sort({ name: 1 });
 
       return res.render(`${req.ejsUser.role}/create-blog`, {
         title: "Create Blog",
@@ -957,21 +982,19 @@ class AuthEJSController {
           req.ejsUser.role === "admin"
             ? "Blog created and published successfully."
             : "Blog created and submitted for approval.",
-        blog,
       });
     } catch (error) {
+      // Remove the new upload if blog creation fails.
+      if (uploadedImage?.public_id) {
+        try {
+          await deleteCloudinary(uploadedImage.public_id);
+        } catch (cleanupError) {
+          console.error("Image cleanup failed:", cleanupError);
+        }
+      }
+
       console.error("Create blog error:", error);
-
-      const categories = await Category.find().sort({
-        name: 1,
-      });
-
-      return res.status(500).render(`${req.ejsUser.role}/create-blog`, {
-        user: req.ejsUser,
-        categories,
-        error: "Blog creation failed",
-        success: null,
-      });
+      return res.status(500).send("Blog creation failed.");
     }
   }
 
@@ -1086,23 +1109,13 @@ class AuthEJSController {
     try {
       const blogId = req.params.id;
 
-      console.log("Edit Blog ID:", blogId);
-      console.log("Logged in user:", req.ejsUser.email);
-      console.log("Logged in role:", req.ejsUser.role);
-
-      // -------------------------------------------------
-      // Validate MongoDB ID
-      // -------------------------------------------------
-
-      // const mongoose = require("mongoose");
-
+      // console.log("Edit Blog ID:", blogId);
+      // console.log("Logged in user:", req.ejsUser.email);
+      // console.log("Logged in role:", req.ejsUser.role);
+    
       if (!mongoose.Types.ObjectId.isValid(blogId)) {
         return res.status(400).send("Invalid blog ID");
       }
-
-      // -------------------------------------------------
-      // Find blog
-      // -------------------------------------------------
 
       const blog = await Blog.findById(blogId);
 
@@ -1110,36 +1123,20 @@ class AuthEJSController {
         return res.status(404).send("Blog not found");
       }
 
-      // -------------------------------------------------
-      // Writer can edit only own blog
-      // -------------------------------------------------
-
       if (req.ejsUser.role === "writer") {
         if (blog.author.toString() !== req.ejsUser._id.toString()) {
           return res.status(403).send("You can edit only your own blog.");
         }
       }
 
-      // -------------------------------------------------
-      // Get categories
-      // -------------------------------------------------
-
       const categories = await Category.find().sort({
         name: 1,
       });
 
-      // -------------------------------------------------
-      // Select EJS view according to role
-      // -------------------------------------------------
-
       const view =
         req.ejsUser.role === "admin" ? "admin/edit-blog" : "writer/edit-blog";
 
-      console.log("Rendering view:", view);
-
-      // -------------------------------------------------
-      // Render
-      // -------------------------------------------------
+      // console.log("Rendering view:", view);
 
       return res.render(view, {
         title: "Edit Blog",
@@ -1165,56 +1162,79 @@ class AuthEJSController {
   //===================================
 
   static async updateBlog(req, res) {
+    let newImage = null;
+
     try {
-      const blogId = req.params.id;
-
       const { title, content, category } = req.body;
-
-      const blog = await Blog.findById(blogId);
+      const blog = await Blog.findById(req.params.id);
 
       if (!blog) {
-        return res.status(404).send("Blog not found");
+        return res.status(404).send("Blog not found.");
       }
 
-      // -------------------------------------------------
-      // WRITER OWNERSHIP
-      // -------------------------------------------------
-
+      // Preserve the existing writer ownership rule.
       if (req.ejsUser.role === "writer") {
         if (blog.author.toString() !== req.ejsUser._id.toString()) {
           return res.status(403).send("You can update only your own blog.");
         }
       }
 
-      // -------------------------------------------------
-      // UPDATE
-      // -------------------------------------------------
+      if (!title || !content || !category) {
+        return res
+          .status(400)
+          .send("Title, content and category are required.");
+      }
+
+      // Save the old Cloudinary ID before replacing the image.
+      const oldPublicId = blog.image?.public_id || null;
+
+      // Upload the replacement only if a new file was selected.
+      if (req.file) {
+        newImage = await uploadCloudinary(req.file.buffer, "blog-images");
+      }
 
       blog.title = title;
       blog.content = content;
       blog.category = category;
 
-      // -------------------------------------------------
-      // WRITER NEEDS APPROVAL AGAIN
-      // -------------------------------------------------
+      // If no new image was selected, retain the existing image.
+      if (newImage) {
+        blog.image = {
+          url: newImage.url,
+          public_id: newImage.public_id,
+        };
+      }
 
+      // Writers must submit edited blogs for approval again.
       if (req.ejsUser.role === "writer") {
         blog.status = "pending";
-
         blog.isPublished = false;
       }
 
       await blog.save();
 
+      // Delete the old image only after MongoDB saves successfully.
+      if (newImage && oldPublicId && oldPublicId !== newImage.public_id) {
+        try {
+          await deleteCloudinary(oldPublicId);
+        } catch (deleteError) {
+          console.error("Unable to delete old Cloudinary image:", deleteError);
+        }
+      }
+
       return res.redirect(`/ejs/blog/${blog._id}`);
     } catch (error) {
-      console.error("UPDATE BLOG ERROR:", error);
+      // Avoid leaving the new upload behind if saving fails.
+      if (newImage?.public_id) {
+        try {
+          await deleteCloudinary(newImage.public_id);
+        } catch (cleanupError) {
+          console.error("New image cleanup failed:", cleanupError);
+        }
+      }
 
-      return res.status(500).json({
-        success: false,
-        message: "Server error",
-        error: error.message,
-      });
+      console.error("Update blog error:", error);
+      return res.status(500).send("Unable to update blog.");
     }
   }
 
@@ -1227,26 +1247,35 @@ class AuthEJSController {
       const blog = await Blog.findById(req.params.id);
 
       if (!blog) {
-        return res.status(404).send("Blog not found");
+        return res.status(404).send("Blog not found.");
       }
 
-      // Writer can delete only own blog
       if (req.ejsUser.role === "writer") {
         if (blog.author.toString() !== req.ejsUser._id.toString()) {
           return res.status(403).send("You can delete only your own blog.");
         }
       }
 
-      await Blog.findByIdAndDelete(req.params.id);
+      const publicId = blog.image?.public_id;
+
+      await Blog.findByIdAndDelete(blog._id);
+
+      // Delete the image after the blog is successfully removed.
+      if (publicId) {
+        try {
+          await deleteCloudinary(publicId);
+        } catch (deleteError) {
+          console.error(
+            "Blog deleted, but Cloudinary cleanup failed:",
+            deleteError,
+          );
+        }
+      }
 
       return res.redirect("/ejs/blogs");
     } catch (error) {
       console.error("Delete blog error:", error);
-
-      return res.status(500).json({
-        success: false,
-        message: "Server error",
-      });
+      return res.status(500).send("Unable to delete blog.");
     }
   }
 

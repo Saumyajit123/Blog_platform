@@ -565,12 +565,10 @@
                     <div class="col-md-6 col-lg-4 reveal">
                         <article class="story-card">
 
-                            <img class="story-image" src="<%= [
-                  'https://m.media-amazon.com/images/M/MV5BMDEzMmQwZjctZWU2My00MWNlLWE0NjItMDJlYTRlNGJiZjcyXkEyXkFqcGc@._V1_.jpg',
-                  'https://m.media-amazon.com/images/M/MV5BNjg3NjY5NGUtZTlkNS00NGE2LWJhMTAtZTlkZDgzZDBhOWY1XkEyXkFqcGc@._V1_.jpg',
-                  'https://m.media-amazon.com/images/S/pv-target-images/26b05277ad6d9d6175bbd05bd8722bc9ffd2523fb42217edaecfb5e8103ec963.jpg',
-                  'https://cdn.sacnilk.com/image/news300/1000023581.jpg'
-                ][index % 4] %>" alt="Editorial image for <%= blog.title %>" loading="lazy">
+                            <img class="story-image" src="<%= blog.image && blog.image.url
+    ? blog.image.url
+    : 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=900&q=80' %>"
+                                alt="<%= blog.title %>" loading="lazy">
 
                             <div class="story-body">
                                 <span class="story-tag">Featured story</span>
