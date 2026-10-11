@@ -1,96 +1,192 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
         <%= title %>
     </title>
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --black: #101010;
+            --panel: #191919;
+        }
+
+        body {
+            background: var(--black);
+            color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .login-layout {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .login-visual {
+            background:
+                linear-gradient(135deg, #000b, #18120a77),
+                url("https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=85") center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: end;
+            padding: 60px;
+        }
+
+        .login-visual h1 {
+            color: var(--gold);
+            font-size: clamp(2.5rem, 4vw, 4rem);
+            font-weight: 800;
+        }
+
+        .login-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 450px;
+            background: var(--panel);
+            border: 1px solid #40351f;
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 20px 60px #0008;
+        }
+
+        .gold {
+            color: var(--gold);
+        }
+
+        .form-control,
+        .form-select {
+            background: #101010;
+            color: white;
+            border: 1px solid #49402d;
+            padding: 12px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: #101010;
+            color: white;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 .2rem #d4af3722;
+        }
+
+        .form-select option {
+            background: #191919;
+        }
+
+        .btn-gold {
+            background: var(--gold);
+            color: #111;
+            font-weight: 700;
+            border: 0;
+            padding: 12px;
+        }
+
+        .btn-gold:hover {
+            background: #f6e3a1;
+        }
+
+        .form-label {
+            color: #e6dfd0;
+        }
+
+        .login-link {
+            color: var(--gold);
+        }
+
+        @media (max-width: 800px) {
+            .login-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .login-visual {
+                display: none;
+            }
+
+            .login-card {
+                padding: 26px 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
+    <main class="login-layout">
+        <section class="login-visual">
+            <h1>Welcome back.</h1>
+            <p class="fs-5">
+                Discover stories, share knowledge, and inspire the community.
+            </p>
+        </section>
 
-    <div class="auth-page">
+        <section class="login-content">
+            <div class="login-card">
+                <a href="/" class="login-link text-decoration-none">← Home</a>
 
-        <div class="auth-card">
+                <h2 class="mt-4 fw-bold">Sign in</h2>
+                <p class="text-secondary">Choose your account type to continue.</p>
 
-            <h1>
-                Blog Platform
-            </h1>
+                <% if (error) { %>
+                    <div class="alert alert-danger">
+                        <%= error %>
+                    </div>
+                    <% } %>
 
-            <h2>
-                Login
-            </h2>
-
-
-            <% if (error) { %>
-
-                <div class="alert error">
-                    <%= error %>
-                </div>
-
-                <% } %>
-
-
-                    <% if (success) { %>
-
-                        <div class="alert success">
-                            <%= success %>
-                        </div>
-
-                        <% } %>
-
-
-                            <form method="POST" action="/ejs/login">
-
-                                <!-- Required by userSchema.login -->
-                                <input type="hidden" name="action" value="login">
-
-
-                                <div class="form-group">
-
-                                    <label>
-                                        Email
-                                    </label>
-
-                                    <input type="email" name="email" placeholder="Enter your email" required>
-
-                                </div>
-
-
-                                <div class="form-group">
-
-                                    <label>
-                                        Password
-                                    </label>
-
-                                    <input type="password" name="password" placeholder="Enter your password" required>
-
-                                </div>
-
-
-                                <button type="submit" class="btn">
-                                    Login
-                                </button>
-
-                            </form>
-
-
-                            <div class="auth-links">
-
-                                <a href="/ejs/forgot-password">
-                                    Forgot Password?
-                                </a>
-
+                        <% if (success) { %>
+                            <div class="alert alert-success">
+                                <%= success %>
                             </div>
+                            <% } %>
 
-        </div>
+                                <form action="/ejs/login" method="POST">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="role">Login as</label>
+                                        <select class="form-select" id="role" name="role" required>
+                                            <option value="user">User</option>
+                                            <option value="writer">Writer</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                    </div>
 
-    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="email">Email address</label>
+                                        <input class="form-control" id="email" name="email" type="email"
+                                            autocomplete="username" required>
+                                    </div>
 
+                                    <div class="mb-4">
+                                        <label class="form-label" for="password">Password</label>
+                                        <input class="form-control" id="password" name="password" type="password"
+                                            autocomplete="current-password" required>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-gold w-100">
+                                        Login securely
+                                    </button>
+                                </form>
+
+                                <div class="d-flex justify-content-between gap-3 mt-4">
+                                    <a class="login-link" href="/ejs/forgot-password">
+                                        Forgot password?
+                                    </a>
+                                    <a class="login-link" href="/ejs/register">
+                                        Create account
+                                    </a>
+                                </div>
+            </div>
+        </section>
+    </main>
 </body>
 
 </html>

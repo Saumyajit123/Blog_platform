@@ -1,4 +1,4 @@
-const User = require("../models/user");
+const User = require("../models/User");
 
 class AuthEJSMiddleware {
   static async requireLogin(req, res, next) {

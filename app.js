@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const DBConnect = require("./src/config/dbconnect");
+const AuthEJSController = require("./src/controller/authEJSController");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
@@ -47,6 +48,8 @@ app.use("/api/blog", authRouter);
 
 const authEjsRouter = require("./src/router/authEJSRouter");
 app.use("/ejs", authEjsRouter);
+
+app.get("/", AuthEJSController.landingPage);
 
 app.listen(Port, () => {
   console.log(`Server is running on port: ${Port}`);

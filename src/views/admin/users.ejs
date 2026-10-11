@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
         <%= title %>
@@ -11,9 +11,138 @@
 
     <link rel="stylesheet" href="/css/style.css">
 
+    <style>
+        .approval-section {
+            margin: 25px 0;
+            padding: 24px;
+            border: 1px solid #665322;
+            border-radius: 12px;
+            background: #171717;
+        }
+
+        .approval-section h2 {
+            color: #d4af37;
+            margin-bottom: 10px;
+        }
+
+        .approval-section p {
+            color: #bbb;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: capitalize;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #4a3a14;
+            color: #ffdf80;
+        }
+
+        .status-approved {
+            background: #173e27;
+            color: #a5edb8;
+        }
+
+        .status-rejected {
+            background: #4a2020;
+            color: #ffaaaa;
+        }
+
+        .role-badge {
+            text-transform: capitalize;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .action-buttons form {
+            margin: 0;
+        }
+
+        .button.approve {
+            background: #216b3a;
+            color: white;
+            border: 1px solid #398951;
+        }
+
+        .button.reject {
+            background: #742c2c;
+            color: white;
+            border: 1px solid #974242;
+        }
+
+        .button.reconsider {
+            background: #d4af37;
+            color: #111;
+            border: 1px solid #d4af37;
+        }
+
+        .button.approve:hover {
+            background: #2d854a;
+        }
+
+        .button.reject:hover {
+            background: #923939;
+        }
+
+        .button.reconsider:hover {
+            background: #f0ce62;
+        }
+
+        .application-count {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 3px 9px;
+            border-radius: 15px;
+            background: #4a3a14;
+            color: #ffdf80;
+            font-size: 12px;
+        }
+
+        .empty-message {
+            padding: 18px;
+            color: #aaa;
+        }
+
+        .rejection-reason {
+            display: block;
+            max-width: 200px;
+            margin-top: 5px;
+            color: #ffaaaa;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .approval-section {
+                padding: 14px;
+            }
+
+            .action-buttons {
+                min-width: 180px;
+            }
+        }
+    </style>
 </head>
 
 <body>
+
+    <!-- ================================
+         NAVIGATION
+    ================================= -->
 
     <nav class="navbar">
 
@@ -23,21 +152,13 @@
 
         <div class="nav-links">
 
-            <a href="/ejs/dashboard">
-                Dashboard
-            </a>
+            <a href="/ejs/dashboard">Dashboard</a>
 
-            <a href="/ejs/blogs">
-                Blogs
-            </a>
+            <a href="/ejs/blogs">Blogs</a>
 
-            <a href="/ejs/admin/users">
-                Users
-            </a>
+            <a href="/ejs/admin/users">Users</a>
 
-            <a href="/ejs/logout">
-                Logout
-            </a>
+            <a href="/ejs/logout">Logout</a>
 
         </div>
 
@@ -46,16 +167,18 @@
 
     <div class="container">
 
+        <!-- ================================
+             PAGE HEADER
+        ================================= -->
+
         <div class="page-header">
 
             <div>
 
-                <h1>
-                    User Management
-                </h1>
+                <h1>User Management</h1>
 
                 <p class="muted">
-                    Create users and send password-change emails.
+                    Manage accounts, approve applications, and send password emails.
                 </p>
 
             </div>
@@ -67,6 +190,10 @@
         </div>
 
 
+        <!-- ================================
+             SUCCESS MESSAGE
+        ================================= -->
+
         <% if (message) { %>
 
             <div class="alert success">
@@ -76,99 +203,372 @@
             <% } %>
 
 
-                <div class="table-wrapper">
+                <!-- ================================
+             APPLICATION COUNTS
+        ================================= -->
 
-                    <table>
+                <% const getRequestedRole=(item)=> {
+                    return item.requestedRole || item.role;
+                    };
 
-                        <thead>
+                    const getApprovalStatus = (item) => {
+                    // Existing accounts without this field remain compatible.
+                    return item.approvalStatus || "approved";
+                    };
 
-                            <tr>
+                    const pendingApplications = users.filter((item) =>
+                    ["writer", "user"].includes(getRequestedRole(item)) &&
+                    getApprovalStatus(item) === "pending"
+                    );
 
-                                <th>
-                                    Name
-                                </th>
+                    const pendingWriters = pendingApplications.filter(
+                    (item) => getRequestedRole(item) === "writer"
+                    );
 
-                                <th>
-                                    Email
-                                </th>
+                    const pendingUsers = pendingApplications.filter(
+                    (item) => getRequestedRole(item) === "user"
+                    );
 
-                                <th>
-                                    Role
-                                </th>
-
-                                <th>
-                                    Created
-                                </th>
-
-                                <th>
-                                    Password Email
-                                </th>
-
-                            </tr>
-
-                        </thead>
+                    const rejectedApplications = users.filter((item) =>
+                    ["writer", "user"].includes(getRequestedRole(item)) &&
+                    getApprovalStatus(item) === "rejected"
+                    );
+                    %>
 
 
-                        <tbody>
+                    <!-- ================================
+             APPLICATION SUMMARY
+        ================================= -->
 
-                            <% users.forEach((item)=> { %>
+                    <div class="approval-section">
 
-                                <tr>
+                        <h2>Application Overview</h2>
 
-                                    <td>
-                                        <%= item.name %>
-                                    </td>
+                        <p>
+                            Review registration requests before granting access.
+                        </p>
 
-                                    <td>
-                                        <%= item.email %>
-                                    </td>
+                        <div class="table-wrapper">
 
-                                    <td>
+                            <table>
 
-                                        <span class="role-badge <%= item.role %>">
-                                            <%= item.role %>
-                                        </span>
+                                <thead>
+                                    <tr>
+                                        <th>Pending Writers</th>
+                                        <th>Pending Users</th>
+                                        <th>Rejected Applications</th>
+                                    </tr>
+                                </thead>
 
-                                    </td>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <span class="status-badge status-pending">
+                                                <%= pendingWriters.length %> Pending
+                                            </span>
+                                        </td>
 
-                                    <td>
-                                        <%= new Date( item.createdAt ).toLocaleDateString() %>
-                                    </td>
+                                        <td>
+                                            <span class="status-badge status-pending">
+                                                <%= pendingUsers.length %> Pending
+                                            </span>
+                                        </td>
 
-                                    <td>
+                                        <td>
+                                            <span class="status-badge status-rejected">
+                                                <%= rejectedApplications.length %> Rejected
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
 
-                                        <% if ( item.role==="writer" || item.role==="user" ) { %>
+                            </table>
 
-                                            <form method="POST" action="/ejs/admin/users/send-password-email"
-                                                onsubmit="return confirm('Send password-change email?')">
+                        </div>
 
-                                                <input type="hidden" name="userId" value="<%= item._id %>">
+                    </div>
 
-                                                <button type="submit" class="button small">
-                                                    Send Email
-                                                </button>
 
-                                            </form>
+                    <!-- ================================
+             PENDING APPLICATIONS
+        ================================= -->
 
-                                            <% } else { %>
+                    <div class="approval-section">
 
-                                                <span class="muted">
-                                                    Admin
+                        <h2>
+                            Pending Applications
+
+                            <span class="application-count">
+                                <%= pendingApplications.length %>
+                            </span>
+                        </h2>
+
+                        <p>
+                            Approve or reject applications submitted by Writers and Users.
+                        </p>
+
+                        <% if (pendingApplications.length===0) { %>
+
+                            <div class="empty-message">
+                                No pending applications at the moment.
+                            </div>
+
+                            <% } else { %>
+
+                                <div class="table-wrapper">
+
+                                    <table>
+
+                                        <thead>
+
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Requested Role</th>
+                                                <th>Registered</th>
+                                                <th>Decision</th>
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody>
+
+                                            <% pendingApplications.forEach((item)=> { %>
+
+                                                <tr>
+
+                                                    <td>
+                                                        <%= item.name %>
+                                                    </td>
+
+                                                    <td>
+                                                        <%= item.email %>
+                                                    </td>
+
+                                                    <td>
+
+                                                        <span class="role-badge <%= getRequestedRole(item) %>">
+                                                            <%= getRequestedRole(item) %>
+                                                        </span>
+
+                                                    </td>
+
+                                                    <td>
+                                                        <%= new Date(item.createdAt).toLocaleDateString() %>
+                                                    </td>
+
+                                                    <td>
+
+                                                        <div class="action-buttons">
+
+                                                            <!-- APPROVE FORM -->
+
+                                                            <form method="POST"
+                                                                action="/ejs/admin/users/<%= item._id %>/approval"
+                                                                onsubmit="return confirm('Approve this <%= getRequestedRole(item) %> application?')">
+
+                                                                <input type="hidden" name="action" value="approve">
+
+                                                                <button type="submit" class="button small approve">
+                                                                    Approve
+                                                                </button>
+
+                                                            </form>
+
+
+                                                            <!-- REJECT FORM -->
+
+                                                            <form method="POST"
+                                                                action="/ejs/admin/users/<%= item._id %>/approval"
+                                                                onsubmit="return confirm('Reject this application?')">
+
+                                                                <input type="hidden" name="action" value="reject">
+
+                                                                <input type="hidden" name="reason"
+                                                                    value="Application rejected by admin">
+
+                                                                <button type="submit" class="button small reject">
+                                                                    Reject
+                                                                </button>
+
+                                                            </form>
+
+                                                        </div>
+
+                                                    </td>
+
+                                                </tr>
+
+                                                <% }) %>
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                                <% } %>
+
+                    </div>
+
+
+                    <!-- ================================
+             ALL ACCOUNTS
+        ================================= -->
+
+                    <div class="approval-section">
+
+                        <h2>All Accounts</h2>
+
+                        <p>
+                            View every account and its current approval status.
+                        </p>
+
+                        <div class="table-wrapper">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+                                        <th style="background-color:#33373c">Name</th>
+                                        <th style="background-color:#33373c">Email</th>
+                                        <th style="background-color:#33373c">Requested Role</th>
+                                        <th style="background-color:#33373c">Current Role</th>
+                                        <th style="background-color:#33373c">Approval Status</th>
+                                        <th style="background-color:#33373c">Created</th>
+                                        <th style="background-color:#33373c">Actions</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <% users.forEach((item)=> { %>
+
+                                        <tr>
+
+                                            <td>
+                                                <%= item.name %>
+                                            </td>
+
+                                            <td>
+                                                <%= item.email %>
+                                            </td>
+
+                                            <td>
+                                                <%= getRequestedRole(item) %>
+                                            </td>
+
+                                            <td>
+
+                                                <span class="role-badge <%= item.role %>">
+                                                    <%= item.role %>
                                                 </span>
 
-                                                <% } %>
+                                            </td>
 
-                                    </td>
+                                            <td>
 
-                                </tr>
+                                                <% const status=getApprovalStatus(item); %>
 
-                                <% }) %>
+                                                    <span class="status-badge status-<%= status %>">
+                                                        <%= status %>
+                                                    </span>
 
-                        </tbody>
+                                                    <% if (item.rejectionReason) { %>
 
-                    </table>
+                                                        <span class="rejection-reason">
+                                                            Reason: <%= item.rejectionReason %>
+                                                        </span>
 
-                </div>
+                                                        <% } %>
+
+                                            </td>
+
+                                            <td>
+                                                <%= new Date(item.createdAt).toLocaleDateString() %>
+                                            </td>
+
+                                            <td>
+
+                                                <div class="action-buttons">
+
+                                                    <% if (item.role==="admin" ) { %>
+
+                                                        <span class="muted">
+                                                            Administrator
+                                                        </span>
+
+                                                        <% } else if (status==="pending" ) { %>
+
+                                                            <span class="muted">
+                                                                Awaiting decision above
+                                                            </span>
+
+                                                            <% } else if (status==="rejected" ) { %>
+
+                                                                <!-- RECONSIDER FORM -->
+
+                                                                <form method="POST"
+                                                                    action="/ejs/admin/users/<%= item._id %>/approval"
+                                                                    onsubmit="return confirm('Return this application to pending review?')">
+
+                                                                    <input type="hidden" name="action"
+                                                                        value="reconsider">
+
+                                                                    <button type="submit"
+                                                                        class="button small reconsider">
+                                                                        Reconsider
+                                                                    </button>
+
+                                                                </form>
+
+                                                                <% } else { %>
+
+                                                                    <span class="muted">
+                                                                        Approved
+                                                                    </span>
+
+                                                                    <% } %>
+
+
+                                                                        <!-- SEND PASSWORD EMAIL -->
+
+                                                                        <% if (item.role==="writer" ||
+                                                                            item.role==="user" ) { %>
+
+                                                                            <form method="POST"
+                                                                                action="/ejs/admin/users/send-password-email"
+                                                                                onsubmit="return confirm('Send password-change email?')">
+
+                                                                                <input type="hidden" name="userId"
+                                                                                    value="<%= item._id %>">
+
+                                                                                <button type="submit"
+                                                                                    class="button small">
+                                                                                    Send Email
+                                                                                </button>
+
+                                                                            </form>
+
+                                                                            <% } %>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                        <% }) %>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
 
     </div>
 

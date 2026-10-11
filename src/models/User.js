@@ -27,6 +27,35 @@ const userSchema = new mongoose.Schema(
       default: "user",
     },
 
+    requestedRole: {
+      type: String,
+      enum: ["writer", "user"],
+      default: "user",
+    },
+
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "approved",
+    },
+
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
+
+    rejectionReason: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+
     refreshToken: {
       type: String,
       default: null,

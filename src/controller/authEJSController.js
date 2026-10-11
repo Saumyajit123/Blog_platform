@@ -12,56 +12,248 @@ const { title } = require("process");
 
 class AuthEJSController {
   // ================================
+  // Register
+  // ================================
+  static registerPage(req, res) {
+    return res.render("auth/register", {
+      title: "Join the Blog Platform",
+      error: null,
+      success: null,
+    });
+  }
+
+  static async register(req, res) {
+    try {
+      const { name, email, password, role } = req.body;
+      const requestedRole = String(role || "").toLowerCase();
+
+      if (!["writer", "user"].includes(requestedRole)) {
+        return res.status(400).render("auth/register", {
+          title: "Join the Blog Platform",
+          error: "Choose either Writer or User",
+          success: null,
+        });
+      }
+
+      const normalizedEmail = String(email || "")
+        .trim()
+        .toLowerCase();
+
+      const existingUser = await User.findOne({
+        email: normalizedEmail,
+      });
+
+      if (existingUser) {
+        return res.status(409).render("auth/register", {
+          title: "Join the Blog Platform",
+          error: "An account with this email already exists.",
+          success: null,
+        });
+      }
+
+      if (!name || name.trim().length < 2) {
+        return res.status(400).render("auth/register", {
+          title: "Join the Blog Platform",
+          error: "Name must contain at least 2 characters.",
+          success: null,
+        });
+      }
+
+      if (!password || password.length < 8) {
+        return res.status(400).render("auth/register", {
+          title: "Join the Blog Platform",
+          error: "Password must contain at least 8 characters.",
+          success: null,
+        });
+      }
+
+      const hashedPassword = await bcryptjs.hash(password, 10);
+
+      const isWriter = requestedRole === "writer";
+
+      await User.create({
+        name: name.trim(),
+        email: normalizedEmail,
+        password: hashedPassword,
+        role: isWriter ? "user" : "user",
+        requestedRole,
+        approvalStatus: isWriter ? "pending" : "approved",
+        approvedAt: isWriter ? null : new Date(),
+      });
+
+      if (isWriter) {
+        return res.status(201).render("auth/register", {
+          title: "Join the Blog Platform",
+          error: null,
+          success:
+            "Your Writer application has been submitted. " +
+            "You can log in as a Writer after an administrator approves it.",
+        });
+      }
+
+      return res.status(201).render("auth/register", {
+        title: "Join the Blog Platform",
+        error: null,
+        success: "Your User account has been created. You can now log in.",
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+
+      return res.status(500).render("auth/register", {
+        title: "Join the Blog Platform",
+        error: "Unable to create your account. Please try again.",
+        success: null,
+      });
+    }
+  }
+
+  // ================================
   // Login
   // ================================
 
   static loginPage(req, res) {
     const resetSuccess = req.query.reset === "success";
 
-    res.render("auth/login", {
+    return res.render("auth/login", {
       title: "Blog Platform - Login",
       error: null,
       success: resetSuccess
-        ? "Password changed successfully. Please login."
+        ? "Password changed successfully. Please log in."
         : null,
     });
   }
 
   static async login(req, res) {
     try {
-      const { email, password } = req.body;
+      const { email, password, role } = req.body;
+
+      const selectedRole = String(role || "").toLowerCase();
+
+      if (!["admin", "writer", "user"].includes(selectedRole)) {
+        return res.status(400).render("auth/login", {
+          title: "Blog Platform - Login",
+          error: "Please select Admin, Writer or User login.",
+          success: null,
+        });
+      }
 
       const user = await User.findOne({
-        email: email.toLowerCase(),
+        email: String(email || "")
+          .trim()
+          .toLowerCase(),
       });
 
       if (!user) {
         return res.status(401).render("auth/login", {
-          error: "Invalid email or password",
+          title: "Blog Platform - Login",
+          error: "Invalid email or password.",
           success: null,
         });
       }
 
-      const passwordMatch = await bcryptjs.compare(password, user.password);
+      const passwordMatch = await bcryptjs.compare(
+        password || "",
+        user.password,
+      );
 
       if (!passwordMatch) {
         return res.status(401).render("auth/login", {
-          error: "Invalid email or password",
+          title: "Blog Platform - Login",
+          error: "Invalid email or password.",
           success: null,
         });
       }
 
-      // Session based authentication for EJS UI
-      req.session.userId = user._id.toString();
+      if (selectedRole === "admin" && user.role !== "admin") {
+        return res.status(403).render("auth/login", {
+          title: "Blog Platform - Login",
+          error: "This account does not have administrator access.",
+          success: null,
+        });
+      }
 
-      req.session.role = user.role;
+      if (selectedRole === "writer") {
+        if (user.requestedRole !== "writer" && user.role !== "writer") {
+          return res.status(403).render("auth/login", {
+            title: "Blog Platform - Login",
+            error: "This account was not registered as a Writer.",
+            success: null,
+          });
+        }
 
-      return res.redirect("/ejs/dashboard");
+        if (user.approvalStatus === "pending") {
+          return res.status(403).render("auth/login", {
+            title: "Blog Platform - Login",
+            error: "Your Writer application is awaiting admin approval.",
+            success: null,
+          });
+        }
+
+        if (user.approvalStatus === "rejected") {
+          return res.status(403).render("auth/login", {
+            title: "Blog Platform - Login",
+            error:
+              "Your Writer application was rejected. " +
+              (user.rejectionReason || "Please contact the administrator."),
+            success: null,
+          });
+        }
+
+        if (user.role !== "writer") {
+          return res.status(403).render("auth/login", {
+            title: "Blog Platform - Login",
+            error: "Writer access has not been granted to this account.",
+            success: null,
+          });
+        }
+      }
+
+      if (selectedRole === "user") {
+        if (user.role !== "user" || user.requestedRole === "writer") {
+          return res.status(403).render("auth/login", {
+            title: "Blog Platform - Login",
+            error:
+              "This account cannot log in using the User option. " +
+              "Choose its registered role.",
+            success: null,
+          });
+        }
+      }
+
+      req.session.regenerate((sessionError) => {
+        if (sessionError) {
+          console.error(sessionError);
+
+          return res.status(500).render("auth/login", {
+            title: "Blog Platform - Login",
+            error: "Unable to create a secure session.",
+            success: null,
+          });
+        }
+
+        req.session.userId = user._id.toString();
+        req.session.role = user.role;
+
+        return req.session.save((saveError) => {
+          if (saveError) {
+            console.error(saveError);
+
+            return res.status(500).render("auth/login", {
+              title: "Blog Platform - Login",
+              error: "Unable to save your session.",
+              success: null,
+            });
+          }
+
+          return res.redirect("/ejs/dashboard");
+        });
+      });
     } catch (error) {
       console.error("EJS login error:", error);
 
       return res.status(500).render("auth/login", {
-        error: "Something went wrong",
+        title: "Blog Platform - Login",
+        error: "Something went wrong. Please try again.",
         success: null,
       });
     }
@@ -455,23 +647,30 @@ class AuthEJSController {
     try {
       const users = await User.find()
         .select(
-          "-password " +
-            "-refreshToken " +
-            "-secretKeyhash " +
-            "-resetTokenHash " +
-            "-resetTokenExpires ",
+          "-password -refreshToken -secretKeyHash " +
+            "-resetTokenHash -resetTokenExpires",
         )
         .sort({
           createdAt: -1,
-        });
+        })
+        .lean();
+
+      const messages = {
+        approved: "Writer application approved successfully.",
+        rejected: "Writer application rejected.",
+        pending: "Application returned to pending review.",
+      };
       return res.render("admin/users", {
         title: "Manage Users",
         user: req.ejsUser,
         users,
         message:
-          req.query.mail === "sent"
+          messages[req.query.approval] ||
+          (req.query.mail === "sent"
             ? "Password change email sent successfully."
-            : null,
+            : req.query.created === "success"
+              ? "Account created successfully."
+              : null),
       });
     } catch (error) {
       console.error("Users list error:", error);
@@ -526,10 +725,14 @@ class AuthEJSController {
       const hashedPassword = await bcryptjs.hash(password, 10);
 
       const newUser = await User.create({
-        name,
-        email: email.toLowerCase(),
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
         password: hashedPassword,
         role,
+        requestedRole: role,
+        approvalStatus: "approved",
+        approvedBy: req.ejsUser._id,
+        approvedAt: new Date(),
       });
 
       // REDIRECT TO USER MANAGEMENT PAGE
@@ -1189,6 +1392,100 @@ class AuthEJSController {
         success: false,
         message: "Server error",
       });
+    }
+  }
+
+  // ======================================================
+  // Admin approval for writer and user
+  // ======================================================
+
+  static async userApproval(req, res) {
+    try {
+      const { id } = req.params;
+      const { action, reason } = req.body;
+
+      const applicant = await User.findById(id);
+
+      if (!applicant) {
+        return res.status(404).send("Applicant not found");
+      }
+
+      const requestedRole = applicant.requestedRole;
+
+      if (!["user", "writer"].includes(requestedRole)) {
+        return res
+          .status(400)
+          .send("this account does not have an eligible application");
+      }
+
+      if (action === "approve") {
+        ((applicant.role = requestedRole),
+          (applicant.approvalStatus = "approved"),
+          (applicant.approvedBy = req.ejsUser._id));
+        applicant.approvedAt = new Date();
+        applicant.rejectionReason = null;
+      } else if (action === "reject") {
+        applicant.role = "user";
+        applicant.approvalStatus = "rejected";
+        applicant.approvedBy = req.ejsUser._id;
+        applicant.approvedAt = new Date();
+        applicant.rejectionReason = String(
+          reason || "Application rejected by admin",
+        )
+          .trim()
+          .slice(0, 300);
+      } else if (action === "reconsider") {
+        if (applicant.approvalStatus !== "rejected") {
+          return res
+            .status(400)
+            .send("Only rejected applications can be reconsidered.");
+        }
+
+        applicant.role = "user";
+        applicant.approvalStatus = "pending";
+        applicant.approvedBy = null;
+        applicant.approvedAt = null;
+        applicant.rejectionReason = null;
+      } else {
+        return res
+          .status(400)
+          .send("Invalid action. Use approve, reject, or reconsider.");
+      }
+
+      await applicant.save();
+
+      return res.redirect(
+        `/ejs/admin/users?approval=${action === "reconsider" ? "pending" : action === "approve" ? "approved" : "rejected"}`,
+      );
+    } catch (error) {
+      console.error("User approval update error:", error);
+
+      return res.status(500).send("Unable to update application status.");
+    }
+  }
+
+  // =========================================
+  // Landing Page
+  // =========================================
+
+  static async landingPage(req, res) {
+    try {
+      const blogs = await Blog.find({
+        status: "approved",
+        isPublished: true,
+      })
+        .sort({ createdAt: -1 })
+        .limit(6)
+        .lean();
+
+      return res.render("landing", {
+        title: "Golden Pages | Stories Worth Sharing",
+        blogs,
+      });
+    } catch (error) {
+      console.error("Landing page error:", error);
+
+      return res.status(500).send("Unable to load the landing page.");
     }
   }
 }

@@ -1,14 +1,17 @@
 const express = require("express");
-
 const router = express.Router();
 
 const AuthEjsController = require("../controller/authEJSController");
-
 const EjsAuthMiddleware = require("../middleware/authEJSMiddleware");
-
 const Validation = require("../validate");
-
 const userSchema = require("../validate/userSchema");
+
+// ====================================================
+// REGISTER
+// ====================================================
+router.get("/register", AuthEjsController.registerPage);
+
+router.post("/register", AuthEjsController.register);
 
 // =====================================================
 // LOGIN
@@ -16,11 +19,7 @@ const userSchema = require("../validate/userSchema");
 
 router.get("/login", AuthEjsController.loginPage);
 
-router.post(
-  "/login",
-  Validation.validate(userSchema.login),
-  AuthEjsController.login,
-);
+router.post("/login", AuthEjsController.login);
 
 // =====================================================
 // LOGOUT
@@ -145,7 +144,6 @@ router.post(
 
 // =====================================================
 // EDIT BLOG
-// ADMIN + WRITER
 // =====================================================
 
 router.get(
@@ -165,7 +163,6 @@ router.post(
 
 // =====================================================
 // DELETE BLOG
-// ADMIN + WRITER
 // =====================================================
 
 router.post(
@@ -177,7 +174,6 @@ router.post(
 
 // =====================================================
 // LIKE
-// ADMIN + WRITER + USER
 // =====================================================
 
 router.post(
@@ -188,7 +184,6 @@ router.post(
 
 // =====================================================
 // COMMENT
-// ADMIN + WRITER + USER
 // =====================================================
 
 router.post(
@@ -200,7 +195,6 @@ router.post(
 
 // =====================================================
 // APPROVE
-// ADMIN
 // =====================================================
 
 router.post(
@@ -212,7 +206,6 @@ router.post(
 
 // =====================================================
 // REJECT
-// ADMIN
 // =====================================================
 
 router.post(
@@ -234,7 +227,6 @@ router.get(
 
 // =====================================================
 // CREATE CATEGORY
-// ADMIN + WRITER
 // =====================================================
 
 router.get(
@@ -250,6 +242,17 @@ router.post(
   EjsAuthMiddleware.allowRoles("admin", "writer"),
   Validation.validate(userSchema.ejsCreateCategory),
   AuthEjsController.createCategory,
+);
+
+// ====================================================
+// ADMIN APPROVE USER/WRITER
+// ====================================================
+
+router.post(
+  "/admin/users/:id/approval",
+  EjsAuthMiddleware.requireLogin,
+  EjsAuthMiddleware.allowRoles("admin"),
+  AuthEjsController.userApproval,
 );
 
 module.exports = router;

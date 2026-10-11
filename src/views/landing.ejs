@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        <%= title %>
+    </title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f5df91;
+            --bg: #0b0b0b;
+            --surface: #151515;
+            --muted: #b0ada5;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 85px;
+        }
+
+        body {
+            background: var(--bg);
+            color: #f5f2e9;
+            overflow-x: hidden;
+        }
+
+        .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, .94);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid #3b3018;
+            padding: 15px 5%;
+        }
+
+        .brand {
+            color: var(--gold) !important;
+            font-weight: 900;
+            letter-spacing: 1px;
+            font-size: 1.35rem;
+        }
+
+        .site-nav .nav-link {
+            color: #e4e0d6;
+            margin: 0 5px;
+        }
+
+        .site-nav .nav-link:hover {
+            color: var(--gold);
+        }
+
+        .gold-btn {
+            display: inline-block;
+            background: var(--gold);
+            color: #111;
+            border: 1px solid var(--gold);
+            padding: 11px 22px;
+            border-radius: 7px;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+            transition: .25s ease;
+        }
+
+        .gold-btn:hover {
+            background: var(--gold-light);
+            color: #111;
+            transform: translateY(-2px);
+        }
+
+        .outline-gold {
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            background: transparent;
+            padding: 10px 20px;
+            border-radius: 7px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .outline-gold:hover {
+            color: #111;
+            background: var(--gold);
+        }
+
+        .hero {
+            position: relative;
+            min-height: 650px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            background: #111;
+        }
+
+        .hero-slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            background-position: center;
+            background-size: cover;
+            transition: opacity 1s ease;
+        }
+
+        .hero-slide.active {
+            opacity: 1;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(0, 0, 0, .94), rgba(0, 0, 0, .62) 55%, rgba(0, 0, 0, .2)),
+                linear-gradient(0deg, #0b0b0b, transparent 35%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 850px;
+            padding: 100px 8%;
+            animation: heroEnter .8s ease both;
+        }
+
+        .eyebrow {
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: .78rem;
+            font-weight: 800;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 7vw, 6.2rem);
+            font-weight: 900;
+            line-height: 1.03;
+            margin: 20px 0;
+        }
+
+        .hero h1 span {
+            color: var(--gold);
+        }
+
+        .hero p {
+            color: #d0ccc2;
+            max-width: 620px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .hero-controls {
+            position: absolute;
+            z-index: 3;
+            bottom: 35px;
+            right: 6%;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .slider-arrow {
+            width: 43px;
+            height: 43px;
+            border-radius: 50%;
+            color: var(--gold);
+            background: #111b;
+            border: 1px solid var(--gold);
+            cursor: pointer;
+        }
+
+        .slider-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 0;
+            background: #777;
+            cursor: pointer;
+        }
+
+        .slider-dot.active {
+            background: var(--gold);
+            width: 25px;
+            border-radius: 10px;
+        }
+
+        .section {
+            padding: 90px 7%;
+        }
+
+        .section-heading {
+            max-width: 750px;
+            margin-bottom: 40px;
+        }
+
+        .section-heading h2 {
+            font-weight: 850;
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            margin-top: 12px;
+        }
+
+        .section-heading p {
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .feature-card,
+        .story-card {
+            height: 100%;
+            overflow: hidden;
+            border: 1px solid #342b19;
+            background: var(--surface);
+            border-radius: 15px;
+            transition: transform .3s ease, border-color .3s ease;
+        }
+
+        .feature-card:hover,
+        .story-card:hover {
+            transform: translateY(-7px);
+            border-color: var(--gold);
+        }
+
+        .feature-card {
+            padding: 28px;
+        }
+
+        .feature-icon {
+            color: var(--gold);
+            font-size: 2rem;
+            margin-bottom: 18px;
+        }
+
+        .feature-card p,
+        .story-card p {
+            color: var(--muted);
+            line-height: 1.75;
+        }
+
+        .story-image {
+            width: 100%;
+            height: 230px;
+            object-fit: cover;
+            display: block;
+            background: #292318;
+        }
+
+        .story-body {
+            padding: 23px;
+        }
+
+        .story-body h3 {
+            font-size: 1.25rem;
+            line-height: 1.45;
+            margin: 12px 0;
+        }
+
+        .story-body h3 a {
+            color: #f7f2e5;
+            text-decoration: none;
+        }
+
+        .story-body h3 a:hover {
+            color: var(--gold);
+        }
+
+        .story-tag {
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: .72rem;
+            font-weight: 800;
+        }
+
+        .community {
+            background:
+                linear-gradient(90deg, #10100ff5, #101010c7),
+                url("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1800&q=85") center/cover;
+            border-top: 1px solid #342b19;
+            border-bottom: 1px solid #342b19;
+        }
+
+        .community-inner {
+            max-width: 850px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .community h2 {
+            font-size: clamp(2.3rem, 5vw, 4rem);
+            font-weight: 900;
+        }
+
+        .community p {
+            color: #d0ccc2;
+            line-height: 1.8;
+            margin: 20px 0 30px;
+        }
+
+        .site-footer {
+            padding: 35px 7%;
+            background: #080808;
+            color: var(--muted);
+            border-top: 1px solid #342b19;
+        }
+
+        .site-footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        .modal-content {
+            background: #171717;
+            color: #f5f2e9;
+            border: 1px solid #57451f;
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            border-bottom-color: #3b3018;
+        }
+
+        .modal-footer {
+            border-top-color: #3b3018;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        .form-control,
+        .form-select {
+            background: #0e0e0e;
+            color: #fff;
+            border: 1px solid #4b402b;
+            padding: 12px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: #0e0e0e;
+            color: #fff;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 .2rem #d4af3725;
+        }
+
+        .form-select option {
+            background: #171717;
+        }
+
+        .form-label {
+            color: #e4dfd2;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(25px);
+            transition: opacity .7s ease, transform .7s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes heroEnter {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                min-height: 600px;
+            }
+
+            .hero-content {
+                padding: 90px 7%;
+            }
+
+            .hero-controls {
+                right: 7%;
+                bottom: 22px;
+            }
+
+            .section {
+                padding: 65px 6%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVIGATION -->
+    <nav class="navbar navbar-expand-lg site-nav">
+        <div class="container-fluid">
+            <a class="navbar-brand brand" href="/">GOLDEN PAGES.</a>
+
+            <button class="navbar-toggler border-warning" type="button" data-bs-toggle="collapse"
+                data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+                <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <a class="nav-link" href="#home">Home</a>
+                    <a class="nav-link" href="#stories">Stories</a>
+                    <a class="nav-link" href="#features">Features</a>
+                    <a class="nav-link" href="#community">Community</a>
+
+                    <button class="outline-gold ms-lg-2 mt-2 mt-lg-0" data-bs-toggle="modal"
+                        data-bs-target="#loginModal">
+                        Login
+                    </button>
+
+                    <button class="gold-btn ms-lg-2 mt-2 mt-lg-0" data-bs-toggle="modal"
+                        data-bs-target="#registerModal">
+                        Join the Community
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- HERO SLIDER -->
+    <header class="hero" id="home">
+
+        <div class="hero-slide active"
+            style="background-image:url('https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=2000&q=90')">
+        </div>
+
+        <div class="hero-slide"
+            style="background-image:url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=2000&q=90')">
+        </div>
+
+        <div class="hero-slide"
+            style="background-image:url('https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=2000&q=90')">
+        </div>
+
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content">
+            <span class="eyebrow">Ideas become stories</span>
+
+            <h1>
+                Read deeply.<br>
+                Write <span>boldly.</span>
+            </h1>
+
+            <p>
+                A home for curious readers and ambitious writers.
+                Discover fresh perspectives, share what you know,
+                and turn your ideas into stories worth remembering.
+            </p>
+
+            <div class="d-flex flex-wrap gap-3 mt-4">
+                <a href="#stories" class="gold-btn">Explore Stories</a>
+
+                <button class="outline-gold" data-bs-toggle="modal" data-bs-target="#registerModal">
+                    Become a Writer
+                </button>
+            </div>
+        </div>
+
+        <div class="hero-controls">
+            <button class="slider-arrow" id="prevSlide" aria-label="Previous slide">&#8592;</button>
+
+            <div id="sliderDots" class="d-flex gap-2"></div>
+
+            <button class="slider-arrow" id="nextSlide" aria-label="Next slide">&#8594;</button>
+        </div>
+
+    </header>
+
+
+    <!-- FEATURES -->
+    <section class="section" id="features">
+        <div class="section-heading reveal">
+            <span class="eyebrow">Why Golden Pages</span>
+            <h2>A better place for ideas to grow.</h2>
+            <p>
+                Read stories that matter, share your expertise, and build
+                your voice in a community that values thoughtful writing.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4 reveal">
+                <article class="feature-card">
+                    <div class="feature-icon">&#10022;</div>
+                    <h3>Discover ideas</h3>
+                    <p>
+                        Explore published articles across different interests
+                        and find a new perspective with every visit.
+                    </p>
+                </article>
+            </div>
+
+            <div class="col-md-4 reveal">
+                <article class="feature-card">
+                    <div class="feature-icon">&#9998;</div>
+                    <h3>Become a writer</h3>
+                    <p>
+                        Apply for Writer access. Once an administrator approves
+                        your application, you can publish your work.
+                    </p>
+                </article>
+            </div>
+
+            <div class="col-md-4 reveal">
+                <article class="feature-card">
+                    <div class="feature-icon">&#9733;</div>
+                    <h3>Join the community</h3>
+                    <p>
+                        Read, like, and comment on published articles using
+                        your account and existing platform features.
+                    </p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- FEATURED STORIES -->
+    <section class="section" id="stories" style="background:#101010">
+        <div class="section-heading reveal">
+            <span class="eyebrow">From the community</span>
+            <h2>Stories worth your time.</h2>
+            <p>
+                Explore the latest articles published by our community.
+            </p>
+        </div>
+
+        <div class="row g-4">
+
+            <% if (blogs.length> 0) { %>
+
+                <% blogs.forEach((blog, index)=> { %>
+
+                    <div class="col-md-6 col-lg-4 reveal">
+                        <article class="story-card">
+
+                            <img class="story-image" src="<%= [
+                  'https://m.media-amazon.com/images/M/MV5BMDEzMmQwZjctZWU2My00MWNlLWE0NjItMDJlYTRlNGJiZjcyXkEyXkFqcGc@._V1_.jpg',
+                  'https://m.media-amazon.com/images/M/MV5BNjg3NjY5NGUtZTlkNS00NGE2LWJhMTAtZTlkZDgzZDBhOWY1XkEyXkFqcGc@._V1_.jpg',
+                  'https://m.media-amazon.com/images/S/pv-target-images/26b05277ad6d9d6175bbd05bd8722bc9ffd2523fb42217edaecfb5e8103ec963.jpg',
+                  'https://cdn.sacnilk.com/image/news300/1000023581.jpg'
+                ][index % 4] %>" alt="Editorial image for <%= blog.title %>" loading="lazy">
+
+                            <div class="story-body">
+                                <span class="story-tag">Featured story</span>
+
+                                <h3>
+                                    <a href="/ejs/blog/<%= blog._id %>">
+                                        <%= blog.title %>
+                                    </a>
+                                </h3>
+
+                                <p>
+                                    <%= String(blog.content || "" ) .replace(/<[^>]*>/g, "")
+                                        .slice(0, 145) %><%= blog.content && blog.content.length> 145 ? "..." : "" %>
+                                </p>
+
+                                <a href="/ejs/blog/<%= blog._id %>" class="outline-gold">
+                                    Read Article &rarr;
+                                </a>
+                            </div>
+
+                        </article>
+                    </div>
+
+                    <% }) %>
+
+                        <% } else { %>
+
+                            <div class="col-12">
+                                <div class="feature-card text-center reveal">
+                                    <h3>Our next great story could be yours.</h3>
+                                    <p>
+                                        Published articles will appear here as soon as
+                                        your community starts sharing stories.
+                                    </p>
+                                    <button class="gold-btn" data-bs-toggle="modal" data-bs-target="#registerModal">
+                                        Join the Community
+                                    </button>
+                                </div>
+                            </div>
+
+                            <% } %>
+
+        </div>
+
+        <div class="text-center mt-5 reveal">
+            <a href="/ejs/blogs" class="outline-gold">Explore All Blogs</a>
+        </div>
+    </section>
+
+
+    <!-- COMMUNITY CTA -->
+    <section class="section community" id="community">
+        <div class="community-inner reveal">
+            <span class="eyebrow">Your voice belongs here</span>
+            <h2>Have a story to tell?</h2>
+            <p>
+                Create an account as a reader or apply to become a Writer.
+                Writer applications are reviewed by an administrator to
+                keep our community trustworthy.
+            </p>
+
+            <button class="gold-btn" data-bs-toggle="modal" data-bs-target="#registerModal">
+                Start Your Journey
+            </button>
+        </div>
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="d-flex flex-wrap justify-content-between gap-3">
+            <div>
+                <strong style="color:#d4af37">GOLDEN PAGES.</strong>
+                <p class="mt-2 mb-0">Ideas, stories, and perspectives.</p>
+            </div>
+
+            <div class="d-flex gap-3 align-items-center">
+                <a href="#home">Back to top &uarr;</a>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
+                    Login
+                </a>
+            </div>
+        </div>
+
+        <p class="mt-4 mb-0">
+            &copy; <%= new Date().getFullYear() %> Golden Pages.
+                All rights reserved.
+        </p>
+    </footer>
+
+
+    <!-- LOGIN MODAL -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <form action="/ejs/login" method="POST">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-4" id="loginModalLabel">
+                            Welcome back
+                        </h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <p style="color:#b0ada5">
+                            Sign in to continue to Golden Pages.
+                        </p>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="loginRole">Login as</label>
+                            <select class="form-select" id="loginRole" name="role" required>
+                                <option value="user">User</option>
+                                <option value="writer">Writer</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="loginEmail">Email</label>
+                            <input class="form-control" type="email" id="loginEmail" name="email" autocomplete="email"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="loginPassword">Password</label>
+                            <input class="form-control" type="password" id="loginPassword" name="password"
+                                autocomplete="current-password" required>
+                        </div>
+
+                        <a href="/ejs/forgot-password" style="color:#d4af37">
+                            Forgot password?
+                        </a>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="outline-gold" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="gold-btn">Login</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- REGISTRATION MODAL -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <form action="/ejs/register" method="POST">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-4" id="registerModalLabel">
+                            Join Golden Pages
+                        </h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <p style="color:#b0ada5">
+                            Create an account and choose how you want to participate.
+                        </p>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="registerName">Full name</label>
+                            <input class="form-control" id="registerName" name="name" minlength="2" maxlength="50"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="registerEmail">Email</label>
+                            <input class="form-control" type="email" id="registerEmail" name="email"
+                                autocomplete="email" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="registerPassword">Password</label>
+                            <input class="form-control" type="password" id="registerPassword" name="password"
+                                minlength="8" autocomplete="new-password" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="registerRole">Register as</label>
+                            <select class="form-select" id="registerRole" name="role" required>
+                                <option value="user">User — read and interact with blogs</option>
+                                <option value="writer">Writer — request publishing access</option>
+                            </select>
+                            <small style="color:#b0ada5">
+                                Writer access requires admin approval. Admin accounts
+                                cannot be created through public registration.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="outline-gold" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="gold-btn">Create Account</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Automatic slider, arrows, and indicator dots.
+        (() => {
+            const slides = [...document.querySelectorAll(".hero-slide")];
+            const dotsContainer = document.getElementById("sliderDots");
+            const prevButton = document.getElementById("prevSlide");
+            const nextButton = document.getElementById("nextSlide");
+
+            if (!slides.length || !dotsContainer) return;
+
+            let current = 0;
+            let interval;
+
+            slides.forEach((slide, index) => {
+                const dot = document.createElement("button");
+                dot.className = "slider-dot" + (index === 0 ? " active" : "");
+                dot.setAttribute("aria-label", "Go to slide " + (index + 1));
+                dot.addEventListener("click", () => showSlide(index));
+                dotsContainer.appendChild(dot);
+            });
+
+            const dots = [...dotsContainer.children];
+
+            function showSlide(index) {
+                current = (index + slides.length) % slides.length;
+
+                slides.forEach((slide, i) => {
+                    slide.classList.toggle("active", i === current);
+                });
+
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle("active", i === current);
+                });
+            }
+
+            function startSlider() {
+                clearInterval(interval);
+                interval = setInterval(() => showSlide(current + 1), 5000);
+            }
+
+            prevButton.addEventListener("click", () => {
+                showSlide(current - 1);
+                startSlider();
+            });
+
+            nextButton.addEventListener("click", () => {
+                showSlide(current + 1);
+                startSlider();
+            });
+
+            startSlider();
+        })();
+
+        // Reveal sections as the visitor scrolls.
+        (() => {
+            const elements = document.querySelectorAll(".reveal");
+
+            if (!("IntersectionObserver" in window)) {
+                elements.forEach(element => element.classList.add("visible"));
+                return;
+            }
+
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("visible");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12 });
+
+            elements.forEach(element => observer.observe(element));
+        })();
+    </script>
+
+</body>
+
+</html>
