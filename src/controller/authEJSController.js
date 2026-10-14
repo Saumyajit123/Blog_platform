@@ -1028,7 +1028,7 @@ class AuthEJSController {
 
       //User
       else {
-        blogs = await blog
+        blogs = await Blog
           .find({
             status: "approved",
             isPublished: true,
